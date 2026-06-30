@@ -3,30 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Portfolio Interactif - Roue Infinie</title>
+    <title>Perottino Tony - Portfolio</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="portfolio-container">
+    <!-- Arrière-plan dynamique fixe -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- LE GRAND CONTOUR (Du haut de l'écran jusqu'au footer) -->
+    <main class="portfolio-band">
         
+        <!-- Le titre principal à l'intérieur, au sommet du cadre -->
+        <header class="main-header">
+            <h1>Perottino Tony - Portfolio</h1>
+        </header>
+        
+        <!-- Le nom et la description du projet -->
         <div class="description-box">
             <h2 id="project-title">Chargement...</h2>
             <p id="project-desc">Description...</p>
         </div>
 
+        <!-- Espace de la roue -->
         <div class="wheel-wrapper">
-            
             <button class="nav-btn prev-btn" onclick="rotateWheel('left')">←</button>
             <button class="nav-btn next-btn" onclick="rotateWheel('right')">→</button>
-
             <div class="wheel" id="wheel"></div>
-
             <div class="base-triangle"></div>
         </div>
 
-    </div>
+    </main>
 
+    <!-- CORRECTION : Pied de page pleine largeur (100%) -->
+    <footer class="main-footer">
+        <div class="footer-links">
+            <a href="LIEN" target="_blank">GitHub</a>
+            <a href="LIEN" target="_blank">LinkedIn</a>
+            <a href="LIEN" target="_blank">Contact / CV</a>
+        </div>
+        <p class="copyright">© 2026 Perottino Tony. Tous droits réservés.</p>
+    </footer>
+
+    <script src="background.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
