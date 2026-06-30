@@ -3,17 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio de KibyPoyo</title>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #333; }
-    </style>
+    <title>Mon Portfolio Interactif - Roue Infinie</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
-        <h1>Hello World</h1>
-        <p>OMG ça marche ?</p>
+
+    <div class="portfolio-container">
+        
+        <div class="description-box">
+            <h2 id="project-title">Chargement...</h2>
+            <p id="project-desc">Description...</p>
+        </div>
+
+        <div class="wheel-wrapper">
+            
+            <button class="nav-btn prev-btn" onclick="rotateWheel('left')">←</button>
+            <button class="nav-btn next-btn" onclick="rotateWheel('right')">→</button>
+
+            <div class="wheel" id="wheel"></div>
+
+            <div class="base-triangle"></div>
+        </div>
+
     </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
