@@ -1,6 +1,10 @@
 /* ==========================================
-   STRUCTURE GLOBALE
+   STRUCTURE GLOBALE & EFFET PILIER
    ========================================== */
+html {
+    scroll-behavior: smooth; /* Active le défilement fluide lors du clic sur le menu */
+}
+
 body {
     margin: 0;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -24,93 +28,390 @@ body {
     pointer-events: none;
 }
 
-.main-header {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.main-header h1 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin: 0;
-    color: #ffffff;
-    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-/* ==========================================
-   LE GRAND PANNEAU CENTRAL (EFFET PILIER)
-   ========================================== */
 .portfolio-band {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 40px;
+    gap: 90px; /* Espace généreux entre chaque grande partie */
     flex-grow: 1; 
     
-    width: 600px; 
-    padding: 40px 40px 50px 40px;
+    width: 67%; 
+    max-width: 1200px; /* Sécurité pour que ça ne devienne pas trop géant sur les écrans 4K */
+    padding: 60px 40px 100px 40px;
     margin-bottom: 0;
     box-sizing: border-box;
 
-    /* Effet Verre Dépoli */
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     
-    /* Encadrement latéral uniquement (fusion haut et bas) */
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: none; 
     border-bottom: none; 
     border-radius: 0; 
-    
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
 }
 
-/* ==========================================
-   ZONE DE TEXTE INTÉGRÉE
-   ========================================== */
-.description-box {
+/* ÉVITE L'ÉCRASEMENT SUR MOBILE : Si l'écran est petit, on repasse à 92% pour garder de la place */
+@media (max-width: 768px) {
+    .portfolio-band {
+        width: 92%;
+        padding: 40px 20px;
+        gap: 60px;
+    }
+}
+
+/* Style commun aux sections */
+.portfolio-section {
     width: 100%;
-    max-width: 460px;
-    min-height: 110px;
-    padding: 22px;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     box-sizing: border-box;
-    z-index: 5;
-
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.02);
+    scroll-margin-top: 100px; /* Empêche le header de masquer le haut de la partie */
 }
 
-.description-box h2 { 
-    margin-top: 0; 
-    margin-bottom: 10px;
-    color: #ffffff; 
-    font-size: 24px; 
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 30px;
     letter-spacing: 0.5px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.description-box p { 
-    color: rgba(255, 255, 255, 0.75); 
-    margin-bottom: 0; 
-    font-size: 15px; 
-    line-height: 1.6; 
+/* MODIFIÉ : Les cartes s'élargissent harmonieusement jusqu'à 800px maximum */
+.standard-card, .placeholder-card {
+    width: 100%;
+    max-width: 800px;
+    padding: 24px;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.01);
+}
+
+.placeholder-card p {
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.6;
+    margin: 0;
+    font-size: 15px;
+    font-style: italic;
 }
 
 /* ==========================================
-   SYSTÈME DE LA ROUE
+   HEADER DE NAVIGATION FIXE EN HAUT
    ========================================== */
+.global-header {
+    width: 100%;
+    background: rgba(13, 10, 33, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 14px 40px;
+    box-sizing: border-box;
+}
+
+.nav-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.home-btn {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.2s, transform 0.1s;
+}
+
+.home-btn:hover { background: rgba(255, 255, 255, 0.12); }
+
+.categories-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto; /* Permet le défilement des boutons si l'écran est minuscule */
+}
+
+.category-btn {
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    transition: color 0.2s, background-color 0.2s;
+    white-space: nowrap;
+}
+
+.category-btn:hover { color: #ffffff; }
+
+.category-btn.active {
+    color: #ffffff;
+    background: rgba(52, 152, 219, 0.15);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+/* TITRE DE PRÉSENTATION */
+.main-title-area {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.main-title-area h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin: 0;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+.profile-subtitle {
+    margin: 6px 0 0 0;
+    color: #3498db;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* ==========================================
+   PARCOURS V2 : BANDEAUX INTERACTIFS INFINIS
+   ========================================== */
+/* ==========================================
+   OPTIMISATIONS DES COUCHES GRAPHIQUES (GPU)
+   ========================================== */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    transform: translateZ(0); /* Isole le canvas sur sa propre couche GPU */
+}
+
+.portfolio-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 90px;
+    flex-grow: 1; 
+    width: 75%; 
+    max-width: 1200px;
+    padding: 60px 40px 100px 40px;
+    box-sizing: border-box;
+    background: rgba(13, 10, 33, 0.35); /* Légèrement plus sombre pour un meilleur contraste */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: none; 
+    border-bottom: none; 
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+    
+    transform: translateZ(0); /* Force l'accélération matérielle sur le panneau */
+    will-change: transform;
+    transition: background-color 0.2s ease;
+}
+
+/* ⚡ LA PROTECTION ANTI-LAG : Quand ça bouge, on stoppe le calcul du flou arrière */
+.portfolio-band.is-animating,
+.portfolio-band.is-animating .timeline-header-band,
+.portfolio-band.is-animating .timeline-header-band::before {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    /* On compense l'absence de flou par une couleur opaque solide temporaire très propre */
+    background: rgba(18, 14, 43, 0.94) !important; 
+}
+
+
+/* ==========================================
+   PARCOURS V2 : STRUCTURE DE L'ACCORDÉON
+   ========================================== */
+.custom-timeline {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: relative;
+}
+
+.timeline-row {
+    width: 100%;
+    display: flex;
+    position: relative;
+}
+.timeline-row.left { justify-content: flex-start; }
+.timeline-row.right { justify-content: flex-end; }
+
+.timeline-item-container {
+    width: 88%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* LE BANDEAU DE TITRE */
+.timeline-header-band {
+    padding: 22px;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    z-index: 6;
+    cursor: pointer;
+    transform: translateZ(0);
+    transition: background-color 0.2s ease;
+}
+.timeline-header-band:hover { background: rgba(255, 255, 255, 0.06); }
+
+/* EXTENSION GAUCHE */
+.timeline-row.left .timeline-header-band {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: none;
+    border-radius: 0 16px 16px 0;
+}
+.timeline-row.left .timeline-header-band::before {
+    content: '';
+    position: absolute;
+    top: -1px; bottom: -1px; right: 100%; width: 100vw;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+    transition: background-color 0.2s ease;
+}
+.timeline-row.left .timeline-header-band:hover::before { background: rgba(255, 255, 255, 0.06); }
+
+/* EXTENSION DROITE */
+.timeline-row.right .timeline-header-band {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: none;
+    border-radius: 16px 0 0 16px;
+}
+.timeline-row.right .timeline-header-band::before {
+    content: '';
+    position: absolute;
+    top: -1px; bottom: -1px; left: 100%; width: 100vw;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+    transition: background-color 0.2s ease;
+}
+.timeline-row.right .timeline-header-band:hover::before { background: rgba(255, 255, 255, 0.06); }
+
+/* TYPOGRAPHIES ET FLÈCHE */
+.timeline-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.timeline-header-band h3 { margin: 5px 0; font-size: 1.15rem; font-weight: 700; color: #ffffff; }
+.timeline-institution { display: block; font-size: 13.5px; color: #3498db; font-weight: 600; font-style: italic; }
+
+.toggle-arrow {
+    position: absolute; right: 22px; top: calc(50% - 10px); font-size: 12px;
+    color: rgba(255, 255, 255, 0.4); transition: transform 0.3s ease, color 0.2s;
+}
+.timeline-header-band:hover .toggle-arrow { color: #ffffff; }
+.timeline-item-container.open .toggle-arrow { transform: rotate(180deg); color: #3498db; }
+
+/* ==========================================================================
+   🚀 STRUCTURE FIXE ET POLICE IDENTIQUE (ZÉRO ADAPTATION DE TAILLE)
+   ========================================================================== */
+.timeline-content {
+    display: block; 
+}
+
+.timeline-content-inner {
+    padding: 20px 10px 10px 10px;
+}
+
+/* 🔴 ÉTAT FERMÉ : Même police, seule la couleur et l'ombre changent */
+.timeline-item-container .timeline-content p {
+    color: #ff3838; /* Rouge alerte */
+    font-family: inherit; /* 👈 Reprend STRICTEMENT ta police d'origine */
+    font-size: 14px;      /* 👈 Même taille */
+    line-height: 1.6;     /* 👈 Même hauteur de ligne */
+    letter-spacing: normal;
+    word-break: normal;
+    margin: 0 0 12px 0;
+    text-shadow: 0 0 6px rgba(255, 56, 56, 0.3);
+    transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+.timeline-item-container .timeline-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* 🟢 ÉTAT OUVERT : Passage au vert hacker */
+.timeline-item-container.open .timeline-content p {
+    color: #2ecc71; /* Vert émeraude */
+    text-shadow: 0 0 6px rgba(46, 204, 113, 0.25);
+}
+
+
+/* ==========================================
+   MODIFIÉ : PARTIE COMPÉTENCES AUTOMATISÉE (GRILLE)
+   ========================================== */
+.skills-grid {
+    display: grid;
+    /* Aligne les catégories côte à côte s'il y a de la place, ou les empile sinon */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 800px; /* Aligné sur la taille max des cartes */
+}
+.skills-category h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 16px;
+    color: #3498db;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+}
+.skills-category ul {
+    margin: 0;
+    padding-left: 20px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 14.5px;
+    line-height: 1.7;
+}
+
+/* ==========================================
+   SYSTÈME DE LA ROUE (PROJETS)
+   ========================================== */
+.project-wheel-box {
+    gap: 30px;
+}
 .wheel-wrapper {
     position: relative;
     width: 440px;
     height: 440px;
-    margin-top: 10px;
 }
-
 .wheel {
     position: absolute;
     width: 100%;
@@ -118,109 +419,147 @@ body {
     border-radius: 50%;
     transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
 }
-
 .slice {
     position: absolute;
     width: 254px; 
     height: 220px; 
-    top: 0;
+    bottom: 0; 
     left: 50%;
     margin-left: -127px; 
-    transform-origin: bottom center; 
-    clip-path: polygon(8px 0px, calc(100% - 8px) 0px, 50% calc(100% - 12px));
+    transform-origin: top center; 
+    clip-path: polygon(50% 12px, calc(100% - 8px) 100%, 8px 100%);
     transform: rotate(var(--initial-angle));
-    transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), filter 0.3s, opacity 0.3s;
+    transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), filter 0.25s ease, opacity 0.3s;
     opacity: 0;
     pointer-events: none;
     filter: brightness(0.5); 
     display: flex;
     justify-content: center;
-    padding-top: 35px;
+    align-items: flex-end; 
+    padding-bottom: 35px; 
     color: white;
     font-weight: 600;
     font-size: 15px;
     box-sizing: border-box;
+    overflow: hidden; 
 }
-
-.slice.visible { opacity: 1; pointer-events: auto; }
+.slice::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
+    transform: translateX(-110%);
+    z-index: 1; pointer-events: none;
+}
+.slice.visible { opacity: 1; pointer-events: auto; cursor: pointer; }
+.slice.visible:hover { filter: brightness(1); }
+.slice.visible:hover::before { transform: translateX(110%); transition: transform 0.55s; }
+.slice span { z-index: 2; transition: letter-spacing 0.3s; }
+.slice.visible:hover span { letter-spacing: 2px; }
 .slice.active { transform: rotate(var(--initial-angle)) scale(1.16); z-index: 5; filter: brightness(1); }
 
 .base-triangle {
     position: absolute;
-    bottom: -20px;
-    left: 50%;
-    width: 280px;
-    height: 240px;
-    margin-left: -140px;
-    background: #0d0a21; 
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    z-index: 10;
+    top: 0; left: 50%; width: 254px; height: 220px; margin-left: -127px; 
+    background: #0d0a21; clip-path: polygon(8px 0px, calc(100% - 8px) 0px, 50% 100%); 
+    z-index: 10; pointer-events: none;
+    display: flex; justify-content: center; align-items: flex-start; padding-top: 35px; box-sizing: border-box;
+}
+.base-triangle span { color: #ffffff; font-size: 15px; font-weight: 600; text-transform: uppercase; }
+
+/* MODIFIÉ : Élargissement de la boîte de description des projets */
+.description-box {
+    width: 100%; 
+    max-width: 800px; 
+    min-height: 110px; 
+    padding: 22px; 
+    text-align: center; 
+    box-sizing: border-box; 
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.04); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    border-radius: 16px;
+}
+.description-box h2 { margin-top: 0; margin-bottom: 10px; color: #ffffff; font-size: 22px; }
+.description-box p { color: rgba(255, 255, 255, 0.75); margin: 0; font-size: 14.5px; line-height: 1.6; }
+.description-box a { color: #3498db; text-decoration: none; border-bottom: 1px dashed #3498db; }
+
+/* ==========================================
+   FOOTER GLOBAL
+   ========================================== */
+.main-footer {
+    width: 100%; 
+    background: rgba(5, 4, 12, 0.85); 
+    backdrop-filter: blur(10px); 
+    padding: 30px 20px;
+    text-align: center; 
+    box-sizing: border-box; 
+    margin-top: auto; 
+    border-top: 1px solid rgba(255, 255, 255, 0.1); 
+}
+.footer-links { 
+    display: flex; 
+    justify-content: center; 
+    gap: 50px; 
+    margin-bottom: 12px; 
+}
+.footer-links a { 
+    color: rgba(255, 255, 255, 0.6); 
+    text-decoration: none; 
+    font-weight: 600; 
+    font-size: 15px; 
+}
+.footer-links a:hover { 
+    color: #ffffff; 
+}
+.copyright { 
+    margin: 0; 
+    font-size: 12px; 
+    color: rgba(255, 255, 255, 0.3); 
+}
+
+/* ==========================================================================
+   👾 LE PETIT VIRUS (SPACE INVADER) - ANGLE ALÉATOIRE DISCRET
+   ========================================================================== */
+.timeline-item-container {
+    position: relative; 
+}
+
+.timeline-virus {
+    position: absolute;
+    top: 30px;          
+    width: 12%;          
+    height: auto;
+    fill: #ff3838;      
+    z-index: 10;        
+    shape-rendering: crispEdges; 
+    
+    /* 🔄 BRANCHEMENT JAVASCRIPT : Applique l'angle dynamique (0deg par défaut au chargement) */
+    transform: rotate(var(--virus-angle, 0deg));
+    transform-origin: center;
+
+    /* ⚠️ CRUCIAL : On n'anime QUE l'opacity pour conserver le rendu "saccadé / image par image" */
+    transition: opacity 0.375s ease-in-out;
+    opacity: 1;
     pointer-events: none;
 }
 
-.nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #ffffff;
-    color: #0d0a21;
-    border: none;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 20;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background 0.2s, transform 0.1s, color 0.2s;
-}
-.nav-btn:hover { background: #0d0a21; color: #ffffff; }
-.nav-btn:active { transform: translateY(-50%) scale(0.9); }
-.prev-btn { left: -28px; }
-.next-btn { right: -28px; }
-
-/* ==========================================
-   CORRECTION : PIED DE PAGE (PLEINE LARGEUR)
-   ========================================== */
-.main-footer {
-    width: 100%; /* Prend désormais tout l'espace horizontal */
-    background: rgba(5, 4, 12, 0.85); /* Un poil plus sombre pour bien stabiliser le bas */
-    backdrop-filter: blur(10px); /* Léger rappel du flou global */
-    padding: 30px 20px;
-    text-align: center;
-    box-sizing: border-box;
-    margin-top: auto;
-    
-    /* Ligne de séparation supérieure traversant tout l'écran */
-    border-top: 1px solid rgba(255, 255, 255, 0.1); 
+/* 👈 POSITIONNEMENT GAUCHE CENTRÉ */
+.timeline-virus.virus-left {
+    left: -22%;        
+    right: auto;
 }
 
-.footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 50px;
-    margin-bottom: 12px;
+/* 👉 POSITIONNEMENT DROITE CENTRÉ */
+.timeline-virus.virus-right {
+    right: -22%;       
+    left: auto;
 }
 
-.footer-links a {
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 15px;
-    transition: color 0.3s, text-shadow 0.3s;
-}
-
-.footer-links a:hover {
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-}
-
-.copyright {
-    margin: 0;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.3);
+/* 🟢 QUAND LE RECTANGLE EST OUVERT : Disparition fluide globale */
+.timeline-item-container.open > .timeline-virus {
+    opacity: 0;
+    /* On force une remise à zéro de la rotation et un scale plus petit pendant le fondu sortant */
+    transform: scale(0.7) rotate(0deg); 
+    transition: opacity 0.375s ease-in-out, transform 0.375s ease-in-out;
 }

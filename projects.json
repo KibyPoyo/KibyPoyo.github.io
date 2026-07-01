@@ -1,0 +1,22 @@
+[
+    { 
+        "title": "Projet 1", 
+        "desc": "Le site est en cours de création. Tu peux suivre l'avancement sur mon <a href='https://github.com' target='_blank'>GitHub</a>.", 
+        "color": "#3498db" 
+    },
+    { 
+        "title": "Projet 2", 
+        "desc": "Description à faire. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte.", 
+        "color": "#9b59b6" 
+    },
+    { "title": "Projet 3", "desc": "Description à faire.", "color": "#e74c3c" },
+    { "title": "Projet 4", "desc": "Description à faire.", "color": "#1abc9c" },
+    { "title": "Projet 5", "desc": "C'est drôle en vrai :D", "color": "#f1c40f" },
+    { "title": "Projet 6", "desc": "Description à faire.", "color": "#e67e22" },
+    { "title": "Projet 7", "desc": "Description à faire.", "color": "#2ecc71" },
+    { "title": "Projet 8", "desc": "Description à faire.", "color": "#95a5a6" },
+    { "title": "Projet 9", "desc": "Mais arrête de tourner cette roue il n'y a rien, tu vois que le site est pas fini quand même !", "color": "#34495e" },
+    { "title": "Projet 10", "desc": "Bon allez t'as le droit à une blague : qu'est-ce qui est jaune et qui attends ? Projet 5 !", "color": "#d35400" },
+    { "title": "Projet 11", "desc": "Description à faire.", "color": "#41bac3" },
+    { "title": "Projet 12", "desc": "Description à faire.", "color": "#27ae60" }
+]

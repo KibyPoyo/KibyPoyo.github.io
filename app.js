@@ -1,79 +1,180 @@
-// Les 12 projets convertis en placeholders cleans
-const projects = [
-    { title: "Projet 1", desc: "Le site est en cours de création :)", color: "#3498db" },     // Bleu
-    { title: "Projet 2", desc: "Description à faire. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte. Beaucoup de texte.", color: "#9b59b6" },     // Violet
-    { title: "Projet 3", desc: "Description à faire.", color: "#e74c3c" },     // Rouge
-    { title: "Projet 4", desc: "Description à faire.", color: "#1abc9c" },     // Turquoise
-    { title: "Projet 5", desc: "Description à faire.", color: "#f1c40f" },     // Jaune
-    { title: "Projet 6", desc: "Description à faire.", color: "#e67e22" },     // Orange
-    { title: "Projet 7", desc: "Description à faire.", color: "#2ecc71" },     // Vert
-    { title: "Projet 8", desc: "Description à faire.", color: "#95a5a6" },     // Gris
-    { title: "Projet 9", desc: "Description à faire.", color: "#34495e" },     // Bleu nuit
-    { title: "Projet 10", desc: "Description à faire.", color: "#d35400" },    // Terre cuite
-    { title: "Projet 11", desc: "Description à faire.", color: "#8e44ad" },    // Violet foncé
-    { title: "Projet 12", desc: "Description à faire.", color: "#27ae60" }     // Vert sapin
-];
-
+// ==========================================================================
+// ⚙️ CONFIGURATION GLOBALE ET VARIABLES DE LA ROUE DES PROJETS
+// ==========================================================================
+let projects = []; // Rempli dynamiquement par projects.json
 let currentIndex = 0;
 let currentRotation = 0;
-const totalItems = projects.length;
+let totalItems = 0;
 const anglePerItem = 60; 
 
 const wheel = document.getElementById('wheel');
 const titleElement = document.getElementById('project-title');
 const descElement = document.getElementById('project-desc');
+let slices; 
 
-// --- GÉNÉRATION DYNAMIQUE DE LA ROUE ---
-projects.forEach((project, i) => {
-    const slice = document.createElement('div');
-    slice.className = 'slice'; 
-    slice.style.backgroundColor = project.color; 
-    
-    slice.style.setProperty('--initial-angle', `${i * anglePerItem}deg`);
-    slice.innerHTML = `<span>P.${i + 1}</span>`; 
-    
-    wheel.appendChild(slice);
+// ==========================================================================
+// 📥 INITIALISATION GLOBALE AU CHARGEMENT DE LA PAGE
+// ==========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Chargement de la présentation textuelle (depuis data.json)
+    chargerPresentation();
+
+    // 2. Chargement et génération de la roue des projets (depuis projects.json)
+    chargerProjets();
+
+    // 3. Activation du suivi du menu au défilement (Scroll Observer)
+    initScrollObserver();
 });
 
-const slices = document.querySelectorAll('.slice');
+// ==========================================================================
+// 📝 FONCTION : CHARGEMENT DYNAMIQUE DE LA PRÉSENTATION (data.json)
+// ==========================================================================
+async function chargerPresentation() {
+    try {
+        const response = await fetch('presentation.json');
+        if (!response.ok) throw new Error("Impossible de récupérer data.json");
+        
+        const data = await response.json();
+        const element = document.getElementById('presentation-text');
+        
+        if (element) {
+            element.textContent = data.presentation;
+        }
+    } catch (error) {
+        console.error("Erreur lors du chargement de la présentation :", error);
+        const element = document.getElementById('presentation-text');
+        if (element) {
+            element.textContent = "Erreur de chargement de la description de présentation.";
+        }
+    }
+}
 
-// --- LOGIQUE DE MISE À POUR ---
+// ==========================================================================
+// 🎡 FONCTIONS : LOGIQUE ET ARCHITECTURE DE LA ROUE DES PROJETS
+// ==========================================================================
+function chargerProjets() {
+    fetch('projects.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Impossible de charger le fichier projects.json");
+            }
+            return response.json();
+        })
+        .then(data => {
+            projects = data;
+            totalItems = projects.length;
+
+            generateWheel();
+            updateText(currentIndex);
+        })
+        .catch(error => {
+            console.error("Erreur lors du chargement des projets :", error);
+            if (titleElement) titleElement.textContent = "Erreur de chargement";
+            if (descElement) descElement.textContent = "Le fichier projects.json n'a pas pu être lu.";
+        });
+}
+
+function generateWheel() {
+    if (!wheel) return;
+
+    projects.forEach((project, i) => {
+        const slice = document.createElement('div');
+        slice.className = 'slice'; 
+        slice.style.backgroundColor = project.color; 
+        
+        slice.style.setProperty('--initial-angle', `${-i * anglePerItem}deg`);
+        slice.innerHTML = `<span>P.${i + 1}</span>`; 
+        
+        // Navigation fluide via le clic sur les triangles de la roue
+        slice.addEventListener('click', () => {
+            let diff = i - currentIndex;
+            if (diff > totalItems / 2) diff -= totalItems;
+            if (diff < -totalItems / 2) diff += totalItems;
+
+            if (diff === 0) {
+                // Redirection vers la page dédiée si le projet est déjà sélectionné (au centre)
+                const snakeCaseTitle = project.title
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[\s\-]+/g, '_')  
+                    .replace(/[^a-z0-9_]/g, ''); 
+                
+                window.location.href = `${snakeCaseTitle}.html`;
+                
+            } else if (Math.abs(diff) <= 2) {
+                // Rotation de la roue pour amener le projet sélectionné sur la base du triangle
+                currentRotation += diff * anglePerItem;
+                currentIndex = (currentIndex + diff + totalItems) % totalItems;
+
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+                updateText(currentIndex);
+            }
+        });
+        
+        wheel.appendChild(slice);
+    });
+
+    slices = document.querySelectorAll('.slice');
+}
+
 function updateText(index) {
-    titleElement.textContent = projects[index].title;
-    descElement.textContent = projects[index].desc;
+    if (projects.length === 0) return;
+
+    if (titleElement) titleElement.textContent = projects[index].title;
+    if (descElement) descElement.innerHTML = projects[index].desc; 
     
+    // Modification optionnelle de la couleur des particules en fond d'écran
     if (window.changeBackgroundParticlesColor && projects[index].color) {
         window.changeBackgroundParticlesColor(projects[index].color);
     }
     
-    slices.forEach((slice, i) => {
-        let diff = i - index;
-        if (diff > totalItems / 2) diff -= totalItems;
-        if (diff < -totalItems / 2) diff += totalItems;
-        
-        slice.classList.remove('active', 'visible');
-        
-        if (Math.abs(diff) <= 2) {
-            slice.classList.add('visible');
-            if (diff === 0) {
-                slice.classList.add('active');
+    // Gestion visuelle de l'affichage sélectif (Voisins visibles VS Projet actif)
+    if (slices) {
+        slices.forEach((slice, i) => {
+            let diff = i - index;
+            if (diff > totalItems / 2) diff -= totalItems;
+            if (diff < -totalItems / 2) diff += totalItems;
+            
+            slice.classList.remove('active', 'visible');
+            
+            if (Math.abs(diff) <= 2) {
+                slice.classList.add('visible');
+                if (diff === 0) {
+                    slice.classList.add('active');
+                }
             }
-        }
-    });
-}
-
-function rotateWheel(direction) {
-    if (direction === 'right') {
-        currentRotation -= anglePerItem; 
-        currentIndex = (currentIndex + 1) % totalItems;
-    } else if (direction === 'left') {
-        currentRotation += anglePerItem; 
-        currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+        });
     }
-
-    wheel.style.transform = `rotate(${currentRotation}deg)`;
-    updateText(currentIndex);
 }
 
-// Lancement au chargement
-updateText(currentIndex);
+// ==========================================================================
+// 👁️ FONCTION : SYNCHRONISATION DU HEADER AU DÉFILEMENT (INTERSECTION OBSERVER)
+// ==========================================================================
+function initScrollObserver() {
+    const sections = document.querySelectorAll(".portfolio-section");
+    const navButtons = document.querySelectorAll(".category-btn");
+
+    const observerOptions = {
+        root: null,
+        rootMargin: "-20% 0px -60% 0px", // Déclenchement précis au passage écran
+        threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute("id");
+                
+                navButtons.forEach(btn => {
+                    if (btn.getAttribute("href") === `#${id}`) {
+                        btn.classList.add("active");
+                    } else {
+                        btn.classList.remove("active");
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+}

@@ -8,34 +8,147 @@
 </head>
 <body>
 
-    <!-- Arrière-plan dynamique fixe -->
+    <header class="global-header">
+        <div class="nav-container">
+            <a href="#presentation" class="home-btn">Perottino Tony</a>
+            <nav class="categories-nav">
+                <a href="#presentation" class="category-btn active">Présentation</a>
+                <a href="#parcours" class="category-btn">Parcours</a>
+                <a href="#projets" class="category-btn">Projets</a>
+                <a href="#competences" class="category-btn">Compétences</a>
+            </nav>
+        </div>
+    </header>
+
     <canvas id="bg-canvas"></canvas>
 
-    <!-- LE GRAND CONTOUR (Du haut de l'écran jusqu'au footer) -->
     <main class="portfolio-band">
         
-        <!-- Le titre principal à l'intérieur, au sommet du cadre -->
-        <header class="main-header">
-            <h1>Perottino Tony - Portfolio</h1>
-        </header>
-        
-        <!-- Le nom et la description du projet -->
-        <div class="description-box">
-            <h2 id="project-title">Chargement...</h2>
-            <p id="project-desc">Description...</p>
-        </div>
+        <section id="presentation" class="portfolio-section">
+            <div class="main-title-area">
+                <h1>Perottino Tony</h1>
+                <p class="profile-subtitle">Futur étudiant à l'ENSIMAG - 21 ans</p>
+            </div>
+            <div class="placeholder-card">
+                <p id="presentation-text">Chargement de la présentation...</p>
+            </div>
+        </section>
 
-        <!-- Espace de la roue -->
-        <div class="wheel-wrapper">
-            <button class="nav-btn prev-btn" onclick="rotateWheel('left')">←</button>
-            <button class="nav-btn next-btn" onclick="rotateWheel('right')">→</button>
-            <div class="wheel" id="wheel"></div>
-            <div class="base-triangle"></div>
-        </div>
+<!-- PARTIE 2 : PARCOURS (Bandeaux Interactifs Déroulants) -->
+        <section id="parcours" class="portfolio-section">
+            <h2 class="section-title">Mon Parcours</h2>
+            <div class="custom-timeline">
+                
+                <!-- Bloc 1 : Formation Licence (Bandeau à GAUCHE) -->
+                <div class="timeline-row left">
+                    <div class="timeline-item-container">
+                        <!-- Ce bandeau s'étend jusqu'au bord de l'écran et sert de bouton -->
+                        <div class="timeline-header-band" onclick="toggleTimeline(this)">
+                            <div class="timeline-meta">
+                                <span class="timeline-badge-school">🎓 FORMATION</span>
+                                <span class="timeline-date">2023 - 2026</span>
+                            </div>
+                            <h3>Double Licence Maths-Informatique (MIDL)</h3>
+                            <span class="timeline-institution">Université de Toulouse</span>
+                            <span class="toggle-arrow">▼</span>
+                        </div>
+                        <!-- Cette zone se déroule au clic -->
+                        <div class="timeline-content">
+                            <div class="timeline-content-inner">
+                                <p><strong>En informatique :</strong> Implémentation de la couche réseau TCP/UDP, création d'un arbre généalogique, implémentation d'arbres rouges noir en C avec Graphviz, jeu de plateau avec IA (algorithme minimax) en Python, création d'une interface de réservation de restaurant avec java sous Netbeans.</p>
+                                <p><strong>En mathématiques :</strong> Une formation appuyée en probabilités pouvant servir le Machine Learning, en algèbre (générale et linéaire), en analyse (équations différentielles, bases de topologie).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bloc 2 : Stage IRIT (Bandeau à DROITE) -->
+                <div class="timeline-row right">
+                    <div class="timeline-item-container">
+                        <div class="timeline-header-band" onclick="toggleTimeline(this)">
+                            <div class="timeline-meta">
+                                <span class="timeline-badge-internship">💼 STAGE</span>
+                                <span class="timeline-date">2025</span>
+                            </div>
+                            <h3>Stage sur une application de gestion d'étudiants</h3>
+                            <span class="timeline-institution">Institut de Recherche en Informatique de Toulouse (IRIT)</span>
+                            <span class="toggle-arrow">▼</span>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-content-inner">
+                                <p>Manipulation d'une base de données sous Java sur une architecture déjà existante, ajouts d'options suivant cette architecture en back-end (Hibernate, manipulation de fichiers xlsx et xml/svg avec Apache POI) et front-end (html, css, js avec Thymeleaf et Bootstrap).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bloc 3 : Baccalauréat (Bandeau à GAUCHE) -->
+                <div class="timeline-row left">
+                    <div class="timeline-item-container">
+                        <div class="timeline-header-band" onclick="toggleTimeline(this)">
+                            <div class="timeline-meta">
+                                <span class="timeline-badge-school">🎓 FORMATION</span>
+                                <span class="timeline-date">2021 - 2023</span>
+                            </div>
+                            <h3>Baccalauréat Général</h3>
+                            <span class="timeline-institution">Lycée polyvalent Marie-Louise Dissard</span>
+                            <span class="toggle-arrow">▼</span>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-content-inner">
+                                <p>Mention Très Bien — Option maths expertes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        
+        <section id="projets" class="portfolio-section project-wheel-box">
+            <h2 class="section-title">Mes Projets</h2>
+            
+            <div class="wheel-wrapper">
+                <div class="wheel" id="wheel"></div>
+                <div class="base-triangle"><span>Projets</span></div>
+            </div>
+
+            <div class="description-box">
+                <h2 id="project-title">Chargement...</h2>
+                <p id="project-desc">Description...</p>
+            </div>
+        </section>
+
+        <section id="competences" class="portfolio-section">
+            <h2 class="section-title">Compétences</h2>
+            <div class="skills-grid">
+                
+                <div class="skills-category standard-card">
+                    <h3>Compétence intéressante :o</h3>
+                    <ul>
+                        <li>La liberté</li>
+                    </ul>
+                </div>
+
+                <div class="skills-category standard-card">
+                    <h3>Y'a vraiment rien de plus t'es au bout de la page là</h3>
+                    <ul>
+                        <li>Et oui...</li>
+                    </ul>
+                </div>
+
+                <div class="skills-category standard-card">
+                    <h3>Le bloc de gauche a raison</h3>
+                    <ul>
+                        <li>Tu t'es perdu à l'heure qu'il est retourne sur TikTok :D</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
 
     </main>
 
-    <!-- CORRECTION : Pied de page pleine largeur (100%) -->
     <footer class="main-footer">
         <div class="footer-links">
             <a href="LIEN" target="_blank">GitHub</a>
@@ -47,5 +160,6 @@
 
     <script src="background.js"></script>
     <script src="app.js"></script>
+    <script src="parcours.js"></script>
 </body>
 </html>
