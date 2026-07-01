@@ -15,6 +15,9 @@ let slices;
 // ==========================================================================
 // 📥 INITIALISATION GLOBALE AU CHARGEMENT DE LA PAGE
 // ==========================================================================
+// ==========================================================================
+// 📥 INITIALISATION GLOBALE AU CHARGEMENT DE LA PAGE
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Chargement de la présentation textuelle (depuis data.json)
     chargerPresentation();
@@ -24,6 +27,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Activation du suivi du menu au défilement (Scroll Observer)
     initScrollObserver();
+
+    // 🛠️ NOUVEAU : CORRECTIF POUR LE RETOUR DE PAGE (DÉCALAGE ASYNCHRONE)
+    // Si l'URL contient une ancre (comme #projets), on attend un tout petit instant
+    // que le parcours et la roue soient injectés pour scroller au bon endroit.
+    if (window.location.hash) {
+        setTimeout(() => {
+            const cible = document.querySelector(window.location.hash);
+            if (cible) {
+                cible.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }, 300); // 300ms de sursis pour laisser le HTML se déployer
+    }
 });
 
 // ==========================================================================
@@ -92,14 +107,15 @@ function generateWheel() {
             if (diff < -totalItems / 2) diff += totalItems;
 
             if (diff === 0) {
-                // Redirection vers la page dédiée si le projet est déjà sélectionné (au centre)
+                // 1. On génère l'identifiant propre du projet
                 const snakeCaseTitle = project.title
                     .toLowerCase()
                     .trim()
                     .replace(/[\s\-]+/g, '_')  
                     .replace(/[^a-z0-9_]/g, ''); 
                 
-                window.location.href = `${snakeCaseTitle}.html`;
+                // 2. MODIFICATION ICI : On redirige vers la page unique project.html
+                window.location.href = `project.html?id=${snakeCaseTitle}`;
                 
             } else if (Math.abs(diff) <= 2) {
                 // Rotation de la roue pour amener le projet sélectionné sur la base du triangle

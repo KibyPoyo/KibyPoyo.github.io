@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Piscine à balles</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #0a0c12; overflow: hidden; }
+        #bg-canvas { display: block; }
+
+        .back-button { position: fixed; top: 20px; left: 20px; padding: 10px 20px; background: rgba(255, 56, 56, 0.2); color: #ff3838; border: 1px solid #ff3838; border-radius: 5px; text-decoration: none; font-family: sans-serif; z-index: 100; }
+        
+        .controls { position: fixed; bottom: 20px; left: 20px; display: flex; gap: 10px; z-index: 100; align-items: center; }
+        input { width: 50px; padding: 8px; background: #0a0c12; border: 1px solid #ff3838; color: white; border-radius: 4px; text-align: center; }
+        button { background: #0a0c12; color: #ff3838; border: 1px solid #ff3838; padding: 8px 12px; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #ff3838; color: white; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-button">← Retour</a>
+
+    <div class="controls">
+        <input type="number" id="ball-count" value="10" min="1">
+        <button onclick="addBalls()">Ajouter</button>
+        <button onclick="removeBalls()">Retirer</button>
+        <button onclick="randomColor()">Couleur Aléatoire</button>
+        
+        <button id="toggle-btn" onclick="toggleMode()">Mode : Répulsion</button>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <script src="background.js"></script>
+
+    <script>
+        function toggleMode() {
+            const isAttracting = window.toggleAttractionMode();
+            const btn = document.getElementById('toggle-btn');
+            btn.innerText = isAttracting ? "Mode : Attraction" : "Mode : Répulsion";
+        }
+
+        function addBalls() {
+            const n = parseInt(document.getElementById('ball-count').value);
+            for(let i = 0; i < n; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                orbs.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: Math.cos(angle) * 0.5,
+                    vy: Math.sin(angle) * 0.5,
+                    cruiseSpeed: 0.5,
+                    radius: 14
+                });
+            }
+        }
+
+        function removeBalls() {
+            const n = parseInt(document.getElementById('ball-count').value);
+            for(let i = 0; i < n && orbs.length > 0; i++) {
+                orbs.pop();
+            }
+        }
+
+        function randomColor() {
+            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            window.changeBackgroundParticlesColor(randomColor);
+        }
+    </script>
+</body>
+</html>

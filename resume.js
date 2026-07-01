@@ -4,21 +4,91 @@ const SCRAMBLE_SPEED_MS = 32;       // Vitesse de mutation ambiante (texte rouge
 const DECRYPT_SPEED_MS = 25;        // Vitesse d'animation de décryptage/recryptage (texte vert)
 const VIRUS_ANIM_SPEED_MS = 1000;   // ⏱️ CADENCE DE L'ANIMATION SACCADÉE DU VIRUS (1000ms = 1s)
 
+// 📥 ÉTAPE 1 : ÉCOUTEUR AU CHARGEMENT DE LA PAGE
 document.addEventListener('DOMContentLoaded', () => {
+    chargerEtBatirParcours();
+});
+
+// 🛠️ ÉTAPE 2 : RECUPÉRATION DU JSON ET INJECTION DANS LE HTML
+async function chargerEtBatirParcours() {
+    try {
+        const response = await fetch('resume.json');
+        if (!response.ok) throw new Error("Impossible de charger le fichier resume.json");
+        
+        const data = await response.json();
+        const container = document.getElementById('timeline-container');
+        
+        if (!container) return;
+        container.innerHTML = ""; // On efface le texte de chargement
+
+        // On rebâtit les rangées
+        data.forEach((item) => {
+            const row = document.createElement('div');
+            row.className = `timeline-row ${item.side}`;
+
+            const paragraphsHTML = item.paragraphs
+                .map(para => `<p>${para}</p>`)
+                .join('');
+
+            // Le HTML structurel (sans le onclick inline qui buggait)
+            row.innerHTML = `
+                <div class="timeline-item-container" style="cursor: pointer;">
+                    <div class="timeline-header-band">
+                        <div class="timeline-meta">
+                            <span class="${item.badgeClass}">${item.badgeText}</span>
+                            <span class="timeline-date">${item.date}</span>
+                        </div>
+                        <h3>${item.title}</h3>
+                        <span class="timeline-institution">${item.institution}</span>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-content-inner">
+                            ${paragraphsHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 🎯 LA CORRECTION : On attache l'événement proprement en pur JavaScript
+            const itemContainer = row.querySelector('.timeline-item-container');
+            itemContainer.addEventListener('click', (event) => {
+                // Sécurité : si on clique sur le texte déplié (pour le surligner par ex), on ne referme pas.
+                if (event.target.closest('.timeline-content-inner')) {
+                    return; 
+                }
+                // Sinon, on lance le toggle !
+                toggleTimeline(itemContainer);
+            });
+
+            container.appendChild(row);
+        });
+
+        // 🚀 ÉTAPE 3 : Initialisation des effets cyberpunk
+        initialiserVirusEtCryptage();
+
+    } catch (error) {
+        console.error("Erreur lors de la génération de la frise chronologique :", error);
+        const container = document.getElementById('timeline-container');
+        if (container) {
+            container.innerHTML = `<p style="text-align: center; color: #ff4a4a;">[ERREUR SYSTÈME] Échec du chargement du protocole Parcours.</p>`;
+        }
+    }
+}
+
+// 👾 ÉTAPE 4 : EFFETS VISUELS ET BOUCLES D'ANIMATIONS
+function initialiserVirusEtCryptage() {
     const items = document.querySelectorAll('.timeline-item-container');
     
     items.forEach((item, index) => {
-        // Alternance sécurisée : index pair = gauche, index impair = droite
         const sideClass = (index % 2 === 0) ? 'virus-left' : 'virus-right';
 
-        // Dessin en Pixel Art du Space Invader (SVG ultra-net)
         const virusSvg = `
             <svg class="timeline-virus ${sideClass}" viewBox="0 0 11 8" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2,0h1v1h-1V0z M8,0h1v1h-1V0z M3,1h1v1h-1V1z M7,1h1v1h-1V1z M2,2h7v1H2V2z M1,3h2v1H1V3z M4,3h3v1H4V3z M8,3h2v1H8V3z M0,4h11v1H0V4z M0,5h1v1H0V5z M2,5h7v1H2V5z M10,5h1v1h-1V5z M0,6h1v1H0V6z M2,6h1v1H2V6z M8,6h1v1H8V6z M10,6h1v1h-1V6z M3,7h2v1H3V7z M6,7h2v1H6V7z"/>
             </svg>
         `;
 
-        // Injection du virus dans le conteneur
         item.insertAdjacentHTML('beforeend', virusSvg);
 
         const paragraphs = item.querySelectorAll('.timeline-content p');
@@ -30,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const realText = tempDiv.textContent;
             p.dataset.originalText = realText;
 
-            // Cryptage INSTANTANÉ au chargement
             let initialScramble = "";
             for (let i = 0; i < realText.length; i++) {
                 if (realText[i] === " " || realText[i] === "\n") {
@@ -43,19 +112,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 👾 ANIMATION DE ROTATION ALÉATOIRE ET SACCADÉE (-45° à 45°)
     setInterval(() => {
         const viruses = document.querySelectorAll('.timeline-virus');
         viruses.forEach(virus => {
-            // Calcule un angle entier aléatoire entre -45 et 45
             const randomAngle = Math.floor(Math.random() * 91) - 45;
-            // On injecte l'angle directement dans la variable CSS du virus
             virus.style.setProperty('--virus-angle', `${randomAngle}deg`);
         });
     }, VIRUS_ANIM_SPEED_MS);
 
     setInterval(scrambleClosedTabs, SCRAMBLE_SPEED_MS);
-});
+}
 
 function scrambleClosedTabs() {
     const closedItems = document.querySelectorAll('.timeline-item-container:not(.open)');
@@ -81,8 +147,7 @@ function scrambleClosedTabs() {
     });
 }
 
-function toggleTimeline(element) {
-    const container = element.parentElement;
+function toggleTimeline(container) {
     const isOpen = container.classList.toggle('open');
     const paragraphs = container.querySelectorAll('.timeline-content p');
 

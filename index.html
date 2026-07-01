@@ -34,74 +34,10 @@
             </div>
         </section>
 
-<!-- PARTIE 2 : PARCOURS (Bandeaux Interactifs Déroulants) -->
         <section id="parcours" class="portfolio-section">
             <h2 class="section-title">Mon Parcours</h2>
-            <div class="custom-timeline">
-                
-                <!-- Bloc 1 : Formation Licence (Bandeau à GAUCHE) -->
-                <div class="timeline-row left">
-                    <div class="timeline-item-container">
-                        <!-- Ce bandeau s'étend jusqu'au bord de l'écran et sert de bouton -->
-                        <div class="timeline-header-band" onclick="toggleTimeline(this)">
-                            <div class="timeline-meta">
-                                <span class="timeline-badge-school">🎓 FORMATION</span>
-                                <span class="timeline-date">2023 - 2026</span>
-                            </div>
-                            <h3>Double Licence Maths-Informatique (MIDL)</h3>
-                            <span class="timeline-institution">Université de Toulouse</span>
-                            <span class="toggle-arrow">▼</span>
-                        </div>
-                        <!-- Cette zone se déroule au clic -->
-                        <div class="timeline-content">
-                            <div class="timeline-content-inner">
-                                <p><strong>En informatique :</strong> Implémentation de la couche réseau TCP/UDP, création d'un arbre généalogique, implémentation d'arbres rouges noir en C avec Graphviz, jeu de plateau avec IA (algorithme minimax) en Python, création d'une interface de réservation de restaurant avec java sous Netbeans.</p>
-                                <p><strong>En mathématiques :</strong> Une formation appuyée en probabilités pouvant servir le Machine Learning, en algèbre (générale et linéaire), en analyse (équations différentielles, bases de topologie).</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bloc 2 : Stage IRIT (Bandeau à DROITE) -->
-                <div class="timeline-row right">
-                    <div class="timeline-item-container">
-                        <div class="timeline-header-band" onclick="toggleTimeline(this)">
-                            <div class="timeline-meta">
-                                <span class="timeline-badge-internship">💼 STAGE</span>
-                                <span class="timeline-date">2025</span>
-                            </div>
-                            <h3>Stage sur une application de gestion d'étudiants</h3>
-                            <span class="timeline-institution">Institut de Recherche en Informatique de Toulouse (IRIT)</span>
-                            <span class="toggle-arrow">▼</span>
-                        </div>
-                        <div class="timeline-content">
-                            <div class="timeline-content-inner">
-                                <p>Manipulation d'une base de données sous Java sur une architecture déjà existante, ajouts d'options suivant cette architecture en back-end (Hibernate, manipulation de fichiers xlsx et xml/svg avec Apache POI) et front-end (html, css, js avec Thymeleaf et Bootstrap).</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bloc 3 : Baccalauréat (Bandeau à GAUCHE) -->
-                <div class="timeline-row left">
-                    <div class="timeline-item-container">
-                        <div class="timeline-header-band" onclick="toggleTimeline(this)">
-                            <div class="timeline-meta">
-                                <span class="timeline-badge-school">🎓 FORMATION</span>
-                                <span class="timeline-date">2021 - 2023</span>
-                            </div>
-                            <h3>Baccalauréat Général</h3>
-                            <span class="timeline-institution">Lycée polyvalent Marie-Louise Dissard</span>
-                            <span class="toggle-arrow">▼</span>
-                        </div>
-                        <div class="timeline-content">
-                            <div class="timeline-content-inner">
-                                <p>Mention Très Bien — Option maths expertes.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="custom-timeline" id="timeline-container">
+                <p style="text-align: center; color: var(--text-muted);">Chargement du parcours...</p>
             </div>
         </section>
         
@@ -151,15 +87,19 @@
 
     <footer class="main-footer">
         <div class="footer-links">
-            <a href="LIEN" target="_blank">GitHub</a>
-            <a href="LIEN" target="_blank">LinkedIn</a>
-            <a href="LIEN" target="_blank">Contact / CV</a>
+            <a href="https://github.com/KibyPoyo" target="_blank">GitHub</a>
+            <a href="https://www.linkedin.com/in/tony-perottino-812a22325/" target="_blank">LinkedIn</a>
+            <a href="mailto:tony.perottino@grenoble-inp.org" target="_blank">Contact / CV</a>
+            
+            <a href="piscine_a_balles.html" class="btn-surprise">
+                <i class="fas fa-ghost"></i> Surprise
+            </a>
         </div>
         <p class="copyright">© 2026 Perottino Tony. Tous droits réservés.</p>
     </footer>
 
     <script src="background.js"></script>
     <script src="app.js"></script>
-    <script src="parcours.js"></script>
+    <script src="resume.js"></script>
 </body>
 </html>

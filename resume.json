@@ -1,0 +1,47 @@
+[
+  {
+    "side": "left",
+    "badgeClass": "timeline-badge-school",
+    "badgeText": "🎓 FORMATION",
+    "date": "2026 - 2028",
+    "title": "Formation d'ingénieur à l'ENSIMAG",
+    "institution": "INP Grenoble",
+    "paragraphs": [
+        "Ma future formation."
+    ]
+  },
+  {
+    "side": "right",
+    "badgeClass": "timeline-badge-school",
+    "badgeText": "🎓 FORMATION",
+    "date": "2023 - 2026",
+    "title": "Double Licence Maths-Informatique (MIDL)",
+    "institution": "Université de Toulouse",
+    "paragraphs": [
+      "<strong>En informatique :</strong> Implémentation de la couche réseau TCP/UDP, création d'un arbre généalogique, implémentation d'arbres rouges noir en C avec Graphviz, jeu de plateau avec IA (algorithme minimax) en Python, création d'une interface de réservation de restaurant avec java sous Netbeans.",
+      "<strong>En mathématiques :</strong> Une formation appuyée en probabilités pouvant servir le Machine Learning, en algèbre (générale et linéaire), en analyse (équations différentielles, bases de topologie)."
+    ]
+  },
+  {
+    "side": "left",
+    "badgeClass": "timeline-badge-internship",
+    "badgeText": "💼 STAGE",
+    "date": "2025",
+    "title": "Stage sur une application de gestion d'étudiants",
+    "institution": "Institut de Recherche en Informatique de Toulouse (IRIT)",
+    "paragraphs": [
+      "Manipulation d'une base de données sous Java sur une architecture déjà existante, ajouts d'options suivant cette architecture en back-end (Hibernate, manipulation de fichiers xlsx et xml/svg avec Apache POI) et front-end (html, css, js avec Thymeleaf et Bootstrap)."
+    ]
+  },
+  {
+    "side": "right",
+    "badgeClass": "timeline-badge-school",
+    "badgeText": "🎓 FORMATION",
+    "date": "2021 - 2023",
+    "title": "Baccalauréat Général",
+    "institution": "Lycée polyvalent Marie-Louise Dissard",
+    "paragraphs": [
+      "Mention Très Bien — Option maths expertes."
+    ]
+  }
+]

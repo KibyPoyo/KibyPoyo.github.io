@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projet - Perottino Tony</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="global-header">
+        <div class="nav-container">
+            <a href="index.html#presentation" class="home-btn">Perottino Tony</a>
+            <nav class="categories-nav">
+                <a href="index.html#presentation" class="category-btn">Présentation</a>
+                <a href="index.html#parcours" class="category-btn">Parcours</a>
+                <a href="index.html#projets" class="category-btn active">Projets</a>
+                <a href="index.html#competences" class="category-btn">Compétences</a>
+            </nav>
+        </div>
+    </header>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <main class="portfolio-band">
+        <section class="portfolio-section">
+            <div class="main-title-area">
+                <h1 id="dynamic-project-title">Chargement du projet...</h1>
+                <p class="profile-subtitle" id="dynamic-project-subtitle">Protocole de récupération des données...</p>
+            </div>
+            
+            <div class="placeholder-card">
+                <div id="dynamic-project-desc">
+                    </div>
+                <div style="margin-top: 30px;">
+                    <a href="index.html#projets" class="category-btn" style="display: inline-block; text-decoration: none;">◄ Retour aux projets</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-links">
+            <a href="LIEN" target="_blank">GitHub</a>
+            <a href="LIEN" target="_blank">LinkedIn</a>
+            <a href="LIEN" target="_blank">Contact / CV</a>
+        </div>
+        <p class="copyright">© 2026 Perottino Tony. Tous droits réservés.</p>
+    </footer>
+
+    <script src="background.js"></script>
+    <script src="project.js"></script>
+</body>
+</html>

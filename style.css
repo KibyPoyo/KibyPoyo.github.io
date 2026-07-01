@@ -523,15 +523,50 @@ body {
    ========================================================================== */
 .timeline-item-container {
     position: relative; 
+    cursor: pointer; /* Le curseur "main" s'affiche sur tout le rectangle violet */
+}
+
+/* 🎯 LA HITBOX (Pour les blocs situés à DROITE de la frise) 
+   Le Space Invader est à gauche, donc on étend le clic vers la DROITE (vers le bord de l'écran) */
+.timeline-row.right .timeline-item-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: -35%; /* 🚀 S'étire vers la droite (le bord extérieur de l'écran) */
+    z-index: 1;
+    cursor: pointer;
+}
+
+/* 🎯 LA HITBOX (Pour les blocs situés à GAUCHE de la frise) 
+   Le Space Invader est à droite, donc on étend le clic vers la GAUCHE (vers le bord de l'écran) */
+.timeline-row.left .timeline-item-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: -35%; /* 🚀 S'étire vers la gauche (le bord extérieur de l'écran) */
+    z-index: 1;
+    cursor: pointer;
+}
+
+/* ⚠️ IMPORTANT : On force le contenu textuel et les titres à passer AU-DESSUS 
+   de la hitbox pour rester sélectionnables et cliquables normalement */
+.timeline-header-band,
+.timeline-content-body {
+    position: relative;
+    z-index: 2;
 }
 
 .timeline-virus {
     position: absolute;
-    top: 30px;          
+    top: 26px;          
     width: 12%;          
     height: auto;
     fill: #ff3838;      
-    z-index: 10;        
+    z-index: 10; /* Le virus reste au tout premier plan visuel */       
     shape-rendering: crispEdges; 
     
     /* 🔄 BRANCHEMENT JAVASCRIPT : Applique l'angle dynamique (0deg par défaut au chargement) */
@@ -541,7 +576,8 @@ body {
     /* ⚠️ CRUCIAL : On n'anime QUE l'opacity pour conserver le rendu "saccadé / image par image" */
     transition: opacity 0.375s ease-in-out;
     opacity: 1;
-    pointer-events: none;
+
+    pointer-events: auto; 
 }
 
 /* 👈 POSITIONNEMENT GAUCHE CENTRÉ */
@@ -562,4 +598,42 @@ body {
     /* On force une remise à zéro de la rotation et un scale plus petit pendant le fondu sortant */
     transform: scale(0.7) rotate(0deg); 
     transition: opacity 0.375s ease-in-out, transform 0.375s ease-in-out;
+    
+    /* Sécurité : Une fois masqué, on désactive les clics sur le virus */
+    pointer-events: none; 
 }
+
+/* ==========================================================================
+   🎁 EASTER EGG - BOUTON SURPRISE
+   ========================================================================== */
+.btn-surprise {
+    position: relative;
+    color: #ff3838; /* Couleur rouge virus/space invader pour attirer discrètement l'œil */
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+/* Effet au survol du bouton */
+.btn-surprise:hover {
+    color: #00ffcc; /* Devient néon/cyberpunk au survol */
+    text-shadow: 0 0 8px #00ffcc;
+    transform: scale(1.05);
+}
+
+.controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+button {
+    background: #0a0c12; /* Même fond que le site */
+    color: #ff3838;
+    border: 1px solid #ff3838;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+button:hover { background: #ff3838; color: white; }
