@@ -176,19 +176,22 @@ body {
     text-align: center;
     margin-bottom: 20px;
 }
+
 .main-title-area h1 {
-    font-size: 2.3rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
+    font-size: 3.5rem; 
+    font-weight: 900;  /* Plus épais (800 à 900) */
+    letter-spacing: 1px;
     margin: 0;
-    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    line-height: 1.1; /* Réduit l'interlignage pour les gros titres */
 }
+
 .profile-subtitle {
-    margin: 6px 0 0 0;
+    margin: 10px 0 0 0; /* Un peu plus d'espace sous le gros titre */
     color: #3498db;
     font-weight: 600;
-    font-size: 15px;
-    letter-spacing: 1px;
+    font-size: 1.1rem; /* Légèrement plus grand pour équilibrer avec le titre */
+    letter-spacing: 2px;
     text-transform: uppercase;
 }
 
@@ -238,7 +241,6 @@ body {
 .portfolio-band.is-animating .timeline-header-band::before {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    /* On compense l'absence de flou par une couleur opaque solide temporaire très propre */
     background: rgba(18, 14, 43, 0.94) !important; 
 }
 
@@ -419,6 +421,7 @@ body {
     border-radius: 50%;
     transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
 }
+
 .slice {
     position: absolute;
     width: 254px; 
@@ -433,16 +436,53 @@ body {
     opacity: 0;
     pointer-events: none;
     filter: brightness(0.5); 
-    display: flex;
-    justify-content: center;
-    align-items: flex-end; 
-    padding-bottom: 35px; 
-    color: white;
-    font-weight: 600;
-    font-size: 15px;
     box-sizing: border-box;
     overflow: hidden; 
+
+    /* Alignement vertical strict vers le bas */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; 
+    align-items: center;
+    padding-bottom: 0px; 
+    padding-left: 0px;
+    padding-right: 0px;
 }
+
+.slice span {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Aligne l'empilement des lignes contre le bas */
+    align-items: center;       /* Centre parfaitement chaque ligne horizontalement */
+    width: 100%;
+    height: 100%;             /* Occupe toute la hauteur pour que le repère soit identique au parent */
+    pointer-events: none;
+}
+
+/* Ces blocs DIV sont ceux générés par ton JavaScript */
+.slice span div {
+    font-size: 11px;      /* Taille petite pour éviter les débordements */
+    line-height: 1.1;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    text-align: center;
+    word-break: break-word;
+    margin-bottom: 2px;
+    
+    /* La contrainte de largeur est maintenant gérée par le JS via 'width: X%' */
+    /* On force une largeur max globale pour être sûr */
+    max-width: 100%;
+}
+
+/* Éléments pour forcer la forme de triangle du texte */
+.shape-left, .shape-right {
+    width: 50%;
+    height: 100%;
+    pointer-events: none;
+}
+.shape-left { float: left; shape-outside: polygon(0 0, 100% 0, 0 100%); }
+.shape-right { float: right; shape-outside: polygon(100% 0, 0 100%, 100% 100%); }
 .slice::before {
     content: '';
     position: absolute;
@@ -454,8 +494,12 @@ body {
 .slice.visible { opacity: 1; pointer-events: auto; cursor: pointer; }
 .slice.visible:hover { filter: brightness(1); }
 .slice.visible:hover::before { transform: translateX(110%); transition: transform 0.55s; }
-.slice span { z-index: 2; transition: letter-spacing 0.3s; }
-.slice.visible:hover span { letter-spacing: 2px; }
+.slice.visible:hover span div {
+    letter-spacing: 2px; /* Applique l'agrandissement directement sur les lignes calculées */
+}
+.slice.visible:hover span {
+    letter-spacing: normal; 
+}
 .slice.active { transform: rotate(var(--initial-angle)) scale(1.16); z-index: 5; filter: brightness(1); }
 
 .base-triangle {
@@ -467,7 +511,6 @@ body {
 }
 .base-triangle span { color: #ffffff; font-size: 15px; font-weight: 600; text-transform: uppercase; }
 
-/* MODIFIÉ : Élargissement de la boîte de description des projets */
 .description-box {
     width: 100%; 
     max-width: 800px; 
@@ -479,10 +522,71 @@ body {
     background: rgba(255, 255, 255, 0.04); 
     border: 1px solid rgba(255, 255, 255, 0.1); 
     border-radius: 16px;
+    margin-top: 60px; 
+    cursor: pointer;  
+    transition: transform 0.2s ease, background 0.2s ease;
 }
+
+.description-box:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
 .description-box h2 { margin-top: 0; margin-bottom: 10px; color: #ffffff; font-size: 22px; }
 .description-box p { color: rgba(255, 255, 255, 0.75); margin: 0; font-size: 14.5px; line-height: 1.6; }
 .description-box a { color: #3498db; text-decoration: none; border-bottom: 1px dashed #3498db; }
+
+/* ==========================================================================
+   GESTION DES TRANSITIONS ET HOVER PENDANT ET APRÈS LA ROTATION
+   ========================================================================== */
+
+/*
+ * Pendant la rotation :
+ * - les clics sont bloqués
+ * - MAIS la transition du .wheel doit continuer à fonctionner.
+ */
+#wheel.is-rotating {
+    pointer-events: none !important;
+}
+
+
+/*
+ * SNAP À 0° :
+ *
+ * Ici on veut réellement supprimer la transition du wheel,
+ * car le retour de la position animée vers 0° doit être instantané.
+ */
+#wheel.no-transition,
+#wheel.no-transition *,
+#wheel.no-transition *::before,
+#wheel.no-transition *::after {
+    transition: none !important;
+    animation: none !important;
+}
+
+
+/*
+ * SUPPRESSION DU HOVER :
+ *
+ * IMPORTANT :
+ * On ne touche PAS à #wheel lui-même.
+ *
+ * Sinon :
+ *
+ *     wheel.style.transform = rotate(...)
+ *
+ * n'aurait plus sa transition de 0.6s.
+ *
+ * On désactive uniquement les transitions/animations
+ * des éléments internes de la roue.
+ */
+#wheel.suppress-hover .slice,
+#wheel.suppress-hover .slice *,
+#wheel.suppress-hover .slice::before,
+#wheel.suppress-hover .slice::after {
+    transition: none !important;
+    animation: none !important;
+}
 
 /* ==========================================
    FOOTER GLOBAL
@@ -619,21 +723,3 @@ body {
     text-shadow: 0 0 8px #00ffcc;
     transform: scale(1.05);
 }
-
-.controls {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    display: flex;
-    gap: 10px;
-    z-index: 100;
-}
-button {
-    background: #0a0c12; /* Même fond que le site */
-    color: #ff3838;
-    border: 1px solid #ff3838;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 4px;
-}
-button:hover { background: #ff3838; color: white; }

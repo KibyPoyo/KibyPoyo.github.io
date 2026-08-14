@@ -1,0 +1,46 @@
+[
+  {
+    "side": "left",
+    "badgeClass": "timeline-badge-school",
+    "badgeText": "🎓 FORMATION",
+    "date": "2026 - 2028",
+    "title": "Formation d'ingénieur à l'ENSIMAG",
+    "institution": "INP Grenoble",
+    "paragraphs": [
+        "Ma future formation."
+    ]
+  },
+  {
+    "side": "right",
+    "badgeClass": "timeline-badge-school",
+    "badgeText": "🎓 FORMATION",
+    "date": "2023 - 2026",
+    "title": "Double Licence Maths-Informatique (MIDL)",
+    "institution": "Université de Toulouse",
+    "paragraphs": [
+      "La MIDL est une formation pluridisciplinaire particulièrement exigeante, combinant une formation approfondie en mathématiques et en informatique sur un volume de <strong>234 ECTS en trois ans</strong>. Elle couvre aussi bien les fondements théoriques des mathématiques - algèbre, analyse, géométrie, arithmétique, probabilités et statistiques - que ceux de l'informatique - algorithmique, programmation, structures de données, systèmes, réseaux et intelligence artificielle. Cette double approche permet de développer une capacité à <strong>raisonner de manière abstraite, formaliser et modéliser des problèmes complexes</strong>, puis à concevoir et implémenter des solutions algorithmiques. Au-delà des connaissances disciplinaires, l'intensité du cursus favorise l'<strong>autonomie, la rigueur, l'organisation, la capacité de travail et la persévérance</strong>, tandis que les projets et travaux en groupe développent la collaboration et la capacité à communiquer des résultats techniques. L'ensemble constitue une formation particulièrement adaptée aux domaines à l'interface des mathématiques et de l'informatique, tels que l'intelligence artificielle, la science des données, la modélisation et la recherche."
+    ]
+  },
+  {
+    "side": "left",
+    "badgeClass": "timeline-badge-internship",
+    "badgeText": "💼 STAGE",
+    "date": "2025 (3 semaines)",
+    "title": "Stage sur une application de gestion d'étudiants",
+    "institution": "Institut de Recherche en Informatique de Toulouse (IRIT)",
+    "paragraphs": [
+        "Amélioration d'une application de visualisation de base de donnée en Java (Spring). Réalisation de tâches backend (Gestion de bases de données via Hibernate, lecture/écriture de fichiers xlsx et xml/svg avec Apache POI) et frontend (Thymeleaf, Bootstrap). L'enjeu principal était de s'immerger dans un code déjà existant, de parvenir à le comprendre pour le debugger, le simplifier, le factoriser, puis ajouter de nouvelles fonctionnalités dans la continuité de l'application."
+    ]
+  },
+  {
+    "side": "right",
+    "badgeClass": "timeline-badge-school",
+    "badgeText": "🎓 FORMATION",
+    "date": "2021 - 2023",
+    "title": "Baccalauréat Général",
+    "institution": "Lycée polyvalent Marie-Louise Dissard",
+    "paragraphs": [
+      "Mention Très Bien - Spécilités Mathématiques et Physique-Chimie, option maths expertes."
+    ]
+  }
+]

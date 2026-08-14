@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // 🛠️ ÉTAPE 2 : RECUPÉRATION DU JSON ET INJECTION DANS LE HTML
 async function chargerEtBatirParcours() {
     try {
-        const response = await fetch('resume.json');
+        const response = await fetch('data/resume.json');
         if (!response.ok) throw new Error("Impossible de charger le fichier resume.json");
         
         const data = await response.json();

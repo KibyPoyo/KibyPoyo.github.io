@@ -1,0 +1,8 @@
+    { 
+        "title": "Projet PLACEHOLDER", 
+        "subtitle": "Sous-titre très original", 
+        "date": "Probablement une année bissextile",
+        "short_desc": "Une description qui a le mérite d'exister.", 
+        "long_desc": "Probablement quelque chose de dithyrambique. Thyrambique.", 
+        "color": "#4aa37f" 
+    },
