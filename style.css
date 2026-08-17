@@ -537,25 +537,26 @@ body {
 .description-box a { color: #3498db; text-decoration: none; border-bottom: 1px dashed #3498db; }
 
 /* ==========================================================================
-   GESTION DES TRANSITIONS ET HOVER PENDANT ET APRÈS LA ROTATION
+   GESTION DES TRANSITIONS / HOVER DE LA ROUE ET TEXTES
    ========================================================================== */
 
-/*
- * Pendant la rotation :
- * - les clics sont bloqués
- * - MAIS la transition du .wheel doit continuer à fonctionner.
- */
 #wheel.is-rotating {
     pointer-events: none !important;
 }
 
+#wheel.suppress-hover .slice:hover {
+    filter: brightness(0.5) !important;
+}
 
-/*
- * SNAP À 0° :
- *
- * Ici on veut réellement supprimer la transition du wheel,
- * car le retour de la position animée vers 0° doit être instantané.
- */
+#wheel.suppress-hover .slice:hover::before {
+    transform: translateX(-110%) !important;
+    transition: none !important;
+}
+
+#wheel.suppress-hover .slice:hover span div {
+    letter-spacing: normal !important;
+}
+
 #wheel.no-transition,
 #wheel.no-transition *,
 #wheel.no-transition *::before,
@@ -564,28 +565,15 @@ body {
     animation: none !important;
 }
 
-
-/*
- * SUPPRESSION DU HOVER :
- *
- * IMPORTANT :
- * On ne touche PAS à #wheel lui-même.
- *
- * Sinon :
- *
- *     wheel.style.transform = rotate(...)
- *
- * n'aurait plus sa transition de 0.6s.
- *
- * On désactive uniquement les transitions/animations
- * des éléments internes de la roue.
- */
-#wheel.suppress-hover .slice,
-#wheel.suppress-hover .slice *,
-#wheel.suppress-hover .slice::before,
-#wheel.suppress-hover .slice::after {
-    transition: none !important;
-    animation: none !important;
+/* Optimisation matérielle (GPU) pour l'encart texte sous la roue */
+#project-title,
+#project-subtitle,
+#project-desc {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform-origin: center center;
+    display: inline-block;
+    width: 100%;
 }
 
 /* ==========================================

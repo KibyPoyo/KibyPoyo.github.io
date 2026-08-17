@@ -1,15 +1,55 @@
-// --- CONFIGURATION DE L'EFFET DE CRYPTAGE / DÉCRYPTAGE & ANIMATIONS ---
 const CRYPTO_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?";
 const SCRAMBLE_SPEED_MS = 32;       // Vitesse de mutation ambiante (texte rouge fermé)
 const DECRYPT_SPEED_MS = 25;        // Vitesse d'animation de décryptage/recryptage (texte vert)
 const VIRUS_ANIM_SPEED_MS = 1000;   // ⏱️ CADENCE DE L'ANIMATION SACCADÉE DU VIRUS (1000ms = 1s)
 
-// 📥 ÉTAPE 1 : ÉCOUTEUR AU CHARGEMENT DE LA PAGE
+function mutateRandomCharWithHeightControl(p) {
+    const realText = p.dataset.originalText;
+    if (!realText) return;
+
+    // Récupération ou initialisation de la hauteur de référence (le premier texte crypté)
+    let targetHeight = parseInt(p.dataset.targetHeight, 10);
+    if (!targetHeight || isNaN(targetHeight)) {
+        targetHeight = p.offsetHeight;
+        p.dataset.targetHeight = targetHeight;
+    }
+
+    let textArray = p.textContent.split("");
+    
+    // Trouver les indices modifiables (hors espaces et sauts de ligne)
+    let validIndices = [];
+    for (let i = 0; i < realText.length; i++) {
+        if (realText[i] !== " " && realText[i] !== "\n") {
+            validIndices.push(i);
+        }
+    }
+    if (validIndices.length === 0) return;
+
+    let randIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
+    
+    // Essai d'un caractère aléatoire de base
+    let candidate = CRYPTO_CHARS.charAt(Math.floor(Math.random() * CRYPTO_CHARS.length));
+    textArray[randIndex] = candidate;
+    p.textContent = textArray.join("");
+
+    // ⚖️ Ajustement dynamique basé sur la hauteur mesurée dans le DOM
+    if (p.offsetHeight > targetHeight) {
+        // Trop long (la ligne a sauté / s'est élargie) -> On met un caractère court/fin
+        const thinChars = "iljI!.,'|";
+        textArray[randIndex] = thinChars.charAt(Math.floor(Math.random() * thinChars.length));
+        p.textContent = textArray.join("");
+    } else if (p.offsetHeight < targetHeight) {
+        // Trop court -> On met un caractère long/large pour combler
+        const wideChars = "mwMW@%#&WD";
+        textArray[randIndex] = wideChars.charAt(Math.floor(Math.random() * wideChars.length));
+        p.textContent = textArray.join("");
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     chargerEtBatirParcours();
 });
 
-// 🛠️ ÉTAPE 2 : RECUPÉRATION DU JSON ET INJECTION DANS LE HTML
 async function chargerEtBatirParcours() {
     try {
         const response = await fetch('data/resume.json');
@@ -30,7 +70,6 @@ async function chargerEtBatirParcours() {
                 .map(para => `<p>${para}</p>`)
                 .join('');
 
-            // Le HTML structurel (sans le onclick inline qui buggait)
             row.innerHTML = `
                 <div class="timeline-item-container" style="cursor: pointer;">
                     <div class="timeline-header-band">
@@ -50,21 +89,18 @@ async function chargerEtBatirParcours() {
                 </div>
             `;
 
-            // 🎯 LA CORRECTION : On attache l'événement proprement en pur JavaScript
+            // 🎯 On attache l'événement proprement en pur JavaScript
             const itemContainer = row.querySelector('.timeline-item-container');
             itemContainer.addEventListener('click', (event) => {
-                // Sécurité : si on clique sur le texte déplié (pour le surligner par ex), on ne referme pas.
                 if (event.target.closest('.timeline-content-inner')) {
                     return; 
                 }
-                // Sinon, on lance le toggle !
                 toggleTimeline(itemContainer);
             });
 
             container.appendChild(row);
         });
 
-        // 🚀 ÉTAPE 3 : Initialisation des effets cyberpunk
         initialiserVirusEtCryptage();
 
     } catch (error) {
@@ -76,7 +112,6 @@ async function chargerEtBatirParcours() {
     }
 }
 
-// 👾 ÉTAPE 4 : EFFETS VISUELS ET BOUCLES D'ANIMATIONS
 function initialiserVirusEtCryptage() {
     const items = document.querySelectorAll('.timeline-item-container');
     
@@ -109,6 +144,9 @@ function initialiserVirusEtCryptage() {
                 }
             }
             p.textContent = initialScramble;
+
+            // 📏 Mémorisation de la hauteur de référence du premier texte crypté
+            p.dataset.targetHeight = p.offsetHeight;
         });
     });
 
@@ -131,18 +169,7 @@ function scrambleClosedTabs() {
 
         const paragraphs = item.querySelectorAll('.timeline-content p');
         paragraphs.forEach(p => {
-            const realText = p.dataset.originalText;
-            if (!realText) return;
-
-            let currentText = p.textContent;
-            let textArray = currentText.split("");
-            let randIndex = Math.floor(Math.random() * realText.length);
-            
-            if (realText[randIndex] !== " " && realText[randIndex] !== "\n") {
-                textArray[randIndex] = CRYPTO_CHARS.charAt(Math.floor(Math.random() * CRYPTO_CHARS.length));
-            }
-            
-            p.textContent = textArray.join("");
+            mutateRandomCharWithHeightControl(p);
         });
     });
 }
@@ -156,6 +183,7 @@ function toggleTimeline(container) {
     paragraphs.forEach(p => {
         const realText = p.dataset.originalText;
         const originalHtml = p.dataset.originalHtml;
+        const targetHeight = parseInt(p.dataset.targetHeight, 10);
         
         if (p.cryptoInterval) clearInterval(p.cryptoInterval);
 
@@ -202,6 +230,15 @@ function toggleTimeline(container) {
                 }
 
                 p.textContent = currentTextArray.join("");
+
+                // Contrôle de hauteur pendant le recryptage à la fermeture
+                if (p.offsetHeight > targetHeight) {
+                    // Si ça dépasse, on ajuste légèrement
+                    const thinChars = "iljI!.,'|";
+                    let randValid = validIndices[Math.floor(Math.random() * validIndices.length)];
+                    currentTextArray[randValid] = thinChars.charAt(Math.floor(Math.random() * thinChars.length));
+                    p.textContent = currentTextArray.join("");
+                }
 
                 if (assignedOrder.length === 0) {
                     clearInterval(p.cryptoInterval);
