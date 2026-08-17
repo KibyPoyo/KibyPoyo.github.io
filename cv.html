@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Perottino Tony</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="global-header">
+        <div class="nav-container">
+            <a href="index.html#presentation" class="home-btn">Perottino Tony</a>
+            <nav class="categories-nav">
+                <a href="index.html#presentation" class="category-btn">Présentation</a>
+                <a href="index.html#parcours" class="category-btn">Parcours</a>
+                <a href="index.html#projets" class="category-btn">Projets</a>
+                <a href="index.html#competences" class="category-btn">Compétences</a>
+            </nav>
+        </div>
+    </header>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <main class="portfolio-band" style="min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 100px; padding-bottom: 40px; box-sizing: border-box;">
+        <div style="max-width: 850px; width: 100%; text-align: center;">
+            <img src="data/cv.png" alt="CV de Perottino Tony" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 25px rgba(0,0,0,0.4); margin-bottom: 25px;">
+            <div>
+                <a href="data/cv.pdf" download class="category-btn" style="text-decoration: none; display: inline-block;">
+                    <i class="fas fa-download"></i> Télécharger le PDF
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/background.js"></script>
+</body>
+</html>
