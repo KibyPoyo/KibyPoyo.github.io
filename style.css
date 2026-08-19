@@ -576,6 +576,12 @@ body {
     width: 100%;
 }
 
+/* L'animation ne se déclenche que si la classe .is-hovered est présente en JS */
+.slice.is-hovered::after,
+.slice.is-hovered .shine {
+    animation: votre-animation-de-lumiere 0.5s ease; /* Remplacez par votre animation existante */
+}
+
 /* ==========================================
    FOOTER GLOBAL
    ========================================== */

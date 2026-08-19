@@ -16,10 +16,10 @@ const TEXT_STRETCH_SCALE = 1.15; // Constante pour accentuer l'effet d'étiremen
    CONFIGURATION CENTRALE DES SLOTS (SCALABLE)
    ========================================================================== */
 const SLOTS_CONFIG = {
-    0: { name: 'Bas',         angle: 0,   diff: 0,  isHidden: false, clickable: true  }, // Slot actif (plus gros et cliquable vers une page)
-    1: { name: 'Bas-gauche',   angle: 60,  diff: -1, isHidden: false, clickable: true  },
+    0: { name: 'Bas',       angle: 0,   diff: 0,  isHidden: false, clickable: true  }, // Slot actif (plus gros et cliquable vers une page)
+    1: { name: 'Bas-gauche',  angle: 60,  diff: -1, isHidden: false, clickable: true  },
     2: { name: 'Haut-gauche',  angle: 120, diff: -2, isHidden: false, clickable: true  },
-    3: { name: 'Haut',         angle: 180, diff: 3,  isHidden: true,  clickable: false }, // Slot caché / sommet
+    3: { name: 'Haut',        angle: 180, diff: 3,  isHidden: true,  clickable: false }, // Slot caché / sommet
     4: { name: 'Haut-droite',  angle: 240, diff: 2,  isHidden: false, clickable: true  },
     5: { name: 'Bas-droite',   angle: 300, diff: 1,  isHidden: false, clickable: true  }
 };
@@ -114,6 +114,24 @@ function initWheel() {
    FABRICATION D'UN TRIANGLE
    ========================================================================== */
 
+function applyHoverStateInstant(sliceElement) {
+    sliceElement.classList.add('is-hovered');
+
+    const span = sliceElement.querySelector('span');
+    if (span) {
+        span.querySelectorAll('div').forEach(div => {
+            div.style.transition = 'none';
+            div.style.letterSpacing = '2px';
+            div.style.transform = 'scale(0.92)';
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    div.style.transition = 'letter-spacing 300ms cubic-bezier(0.25, 1, 0.5, 1), transform 300ms cubic-bezier(0.25, 1, 0.5, 1)';
+                });
+            });
+        });
+    }
+}
+
 function createSliceElement(slotIndex, project) {
     const sliceElement = document.createElement('div');
     sliceElement.className = 'slice visible';
@@ -126,11 +144,34 @@ function createSliceElement(slotIndex, project) {
     sliceElement.classList.toggle('active', isActive);
     sliceElement.style.zIndex = isActive ? '5' : '2';
 
+    sliceElement.addEventListener('mouseenter', () => {
+        sliceElement.classList.add('is-hovered');
+        const span = sliceElement.querySelector('span');
+        if (span) {
+            const lineDivs = span.querySelectorAll('div');
+            lineDivs.forEach(div => {
+                div.style.letterSpacing = '2px';
+                div.style.transform = 'scale(0.92)';
+            });
+        }
+    });
+
+    sliceElement.addEventListener('mouseleave', () => {
+        sliceElement.classList.remove('is-hovered');
+        const span = sliceElement.querySelector('span');
+        if (span) {
+            const lineDivs = span.querySelectorAll('div');
+            lineDivs.forEach(div => {
+                div.style.letterSpacing = '0px';
+                div.style.transform = 'scale(1)';
+            });
+        }
+    });
+
     sliceElement.addEventListener('click', e => {
         e.stopPropagation();
         if (isAnimating) return;
 
-        // Si c'est le triangle du bas (Slot 0, actif), redirection vers la page projet
         if (slotIndex === 0) {
             openCurrentProject();
             return;
@@ -168,6 +209,12 @@ function renderWheelInstant() {
         sliceElement.style.opacity = '1';
 
         wheel.appendChild(sliceElement);
+
+        requestAnimationFrame(() => {
+            if (sliceElement.matches(':hover')) {
+                applyHoverStateInstant(sliceElement);
+            }
+        });
 
         activeSlices.push({
             element: sliceElement,
@@ -252,41 +299,6 @@ function updateTextDescription(index, animate = true) {
     if (window.changeBackgroundParticlesColor && project.color) {
         window.changeBackgroundParticlesColor(project.color);
     }
-}
-
-function animateSliceTextsTransition(nextIndex) {
-    // Phase 1 : Expansion horizontale accentuée des lignes dans les triangles (GPU)
-    activeSlices.forEach(sliceObj => {
-        const span = sliceObj.element.querySelector('span');
-        if (span) {
-            const lineDivs = span.querySelectorAll('div');
-            lineDivs.forEach(div => {
-                div.style.transition = 'transform 300ms cubic-bezier(0.25, 1, 0.5, 1)';
-                div.style.opacity = '1';
-                div.style.transform = `scaleX(${TEXT_STRETCH_SCALE}) scale(0.90)`;
-            });
-        }
-    });
-
-    // Phase 2 : Mise à jour et retour à la normale au milieu de l'animation
-    setTimeout(() => {
-        activeSlices.forEach(sliceObj => {
-            const newProjIndex = getProjectIndex(sliceObj.slotIndex, nextIndex);
-            const newProj = projects[newProjIndex];
-            if (newProj) {
-                applySliceContent(sliceObj.element, newProj);
-                sliceObj.projectIndex = newProjIndex;
-            }
-            const span = sliceObj.element.querySelector('span');
-            if (span) {
-                const lineDivs = span.querySelectorAll('div');
-                lineDivs.forEach(div => {
-                    div.style.opacity = '1';
-                    div.style.transform = 'scaleX(1) scale(1)';
-                });
-            }
-        });
-    }, 300);
 }
 
 
@@ -426,6 +438,11 @@ function assign_movements(steps) {
 function move_all_triangles(movementMap) {
     movementMap.incomingSlices.forEach(anim => {
         wheel.appendChild(anim.element);
+        requestAnimationFrame(() => {
+            if (anim.element.matches(':hover')) {
+                applyHoverStateInstant(anim.element);
+            }
+        });
     });
 
     void wheel.offsetHeight;
@@ -485,9 +502,7 @@ function rotateBy(steps) {
 
     const nextIndex = getIndex(currentIndex + steps);
 
-    // Lancement des animations optimisées (sans fade & sans lag)
     updateTextDescription(nextIndex, true);
-    animateSliceTextsTransition(nextIndex);
 
     const movementMap = assign_movements(steps);
     move_all_triangles(movementMap);
@@ -597,7 +612,9 @@ function wrapTextIntoTriangle(container) {
                 text-overflow:ellipsis;
                 box-sizing:border-box;
                 transform-origin: center;
-                transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+                letter-spacing: 0px;
+                transform: scale(1);
+                transition: letter-spacing 300ms cubic-bezier(0.25, 1, 0.5, 1), transform 300ms cubic-bezier(0.25, 1, 0.5, 1);
             ">
                 ${line.words.length ? line.words.join(' ') : '&nbsp;'}
             </div>
