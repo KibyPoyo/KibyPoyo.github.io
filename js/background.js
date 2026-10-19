@@ -15,72 +15,84 @@ window.addEventListener('mousemove', (e) => {
 });
 window.addEventListener('mouseleave', () => { mouse.x = -1000; mouse.y = -1000; });
 
-let currentBallColor = '#3498db'; 
+// Couleur des orbes normales : l'accent du site, déclaré dans le CSS.
+let currentBallColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
 let isAttracting = false; 
 
 const orbs = [];
 const totalOrbs = 250; 
 const fixedRadius = 14; 
 
-// --- Vérification de la page (avec le "s" à balles) ---
-const isPiscinePage = window.location.pathname.includes('piscine_a_balles.html');
+// La page piscine n'affiche ni Kirby ni ses effets.
+const isBallPitPage = window.location.pathname.includes('piscine_a_balles.html');
 
-// --- Configuration de Kirby (Easter Egg) - Uniquement si ce n'est pas la page piscine ---
-const kirbyImg = new Image();
-if (!isPiscinePage) {
-    kirbyImg.src = 'data/kirby.png';
+// Vitesse de croisière tirée entre 0.5 et 0.8.
+function randomCruiseSpeed() {
+    return Math.random() * 0.3 + 0.5;
 }
 
-// 1. Création des orbes normales
-const normalOrbsCount = isPiscinePage ? totalOrbs : totalOrbs - 1;
-for (let i = 0; i < normalOrbsCount; i++) {
+// Place l'orbe au hasard dans le canvas et la lance dans une direction aléatoire.
+function launchOrb(orb, cruiseSpeed) {
     const angle = Math.random() * Math.PI * 2;
-    const cruiseSpeed = Math.random() * 0.3 + 0.5; 
-    
-    orbs.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: Math.cos(angle) * cruiseSpeed,
-        vy: Math.sin(angle) * cruiseSpeed,
-        cruiseSpeed: cruiseSpeed, 
-        radius: fixedRadius,
-        isKirby: false
-    });
+    orb.x = Math.random() * canvas.width;
+    orb.y = Math.random() * canvas.height;
+    orb.vx = Math.cos(angle) * cruiseSpeed;
+    orb.vy = Math.sin(angle) * cruiseSpeed;
+    orb.cruiseSpeed = cruiseSpeed;
+    return orb;
 }
 
-// 2. Ajout de Kirby uniquement si on n'est PAS sur piscine_a_balles.html
-let overlay, poyoSound, wallHitSound, kirbyClickCount = 0;
-if (!isPiscinePage) {
-    const kirbyAngle = Math.random() * Math.PI * 2;
-    const kirbySpeed = Math.random() * 0.3 + 0.5;
-    orbs.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: Math.cos(kirbyAngle) * kirbySpeed,
-        vy: Math.sin(kirbyAngle) * kirbySpeed,
-        cruiseSpeed: kirbySpeed,
+function createOrb(cruiseSpeed) {
+    return launchOrb({ radius: fixedRadius, isKirby: false }, cruiseSpeed);
+}
+
+// Configuration de Kirby (easter egg).
+const kirbyImg = new Image();
+if (!isBallPitPage) {
+    kirbyImg.src = 'data/images/kirby.png';
+}
+
+// Orbes normales ; hors de la piscine, une place est laissée à Kirby.
+const normalOrbsCount = isBallPitPage ? totalOrbs : totalOrbs - 1;
+for (let i = 0; i < normalOrbsCount; i++) {
+    orbs.push(createOrb(randomCruiseSpeed()));
+}
+
+let overlay, overlayImg, poyoSound, wallHitSound, kirbyClickCount = 0;
+let kirbyAssetsLoaded = false;
+
+// Crée les deux sons et déclenche le chargement de l'image du mur.
+function loadKirbyAssets() {
+    if (kirbyAssetsLoaded) return;
+    kirbyAssetsLoaded = true;
+
+    poyoSound = new Audio('data/poyo.mp3');
+    wallHitSound = new Audio('data/wall_hit.mp3');
+    overlayImg.src = 'data/images/kirby_wall.png';
+}
+
+// Kirby et son voile, absents de la piscine à balles.
+if (!isBallPitPage) {
+    orbs.push(launchOrb({
         radius: fixedRadius,
         isKirby: true,
         rotation: 0,
         rotSpeed: 0.015,
         isDisappeared: false,
         isPermanentlyRemoved: false
-    });
-
-    poyoSound = new Audio('data/poyo.mp3');
-    wallHitSound = new Audio('data/wall_hit.mp3');
+    }, randomCruiseSpeed()));
 
     overlay = document.createElement('div');
     overlay.id = 'kirby-overlay';
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:transparent;display:none;justify-content:center;align-items:center;z-index:99999;';
 
-    const overlayImg = document.createElement('img');
-    overlayImg.src = 'data/kirby_wall.png';
+    // Sans attribut src, cette image ne déclenche aucun téléchargement.
+    overlayImg = document.createElement('img');
     overlayImg.style.cssText = 'width:100vw;height:100vh;object-fit:contain;pointer-events:none;';
     overlay.appendChild(overlayImg);
     document.body.appendChild(overlay);
 
-    // Détection globale avec capture pour Kirby
+    // Clic sur Kirby, intercepté en phase de capture.
     window.addEventListener('click', (e) => {
         const kirby = orbs.find(o => o.isKirby);
         if (!kirby || kirby.isDisappeared || kirby.isPermanentlyRemoved) return;
@@ -93,6 +105,7 @@ if (!isPiscinePage) {
         const dy = clickY - kirby.y;
         
         if (Math.sqrt(dx * dx + dy * dy) < kirby.radius + 8) {
+            loadKirbyAssets();
             kirbyClickCount++;
 
             if (kirbyClickCount <= 2) {
@@ -102,13 +115,7 @@ if (!isPiscinePage) {
                 kirby.isDisappeared = true;
                 setTimeout(() => {
                     if (!kirby.isPermanentlyRemoved) {
-                        kirby.x = Math.random() * canvas.width;
-                        kirby.y = Math.random() * canvas.height;
-                        const newAngle = Math.random() * Math.PI * 2;
-                        const newSpeed = Math.random() * 0.3 + 0.5;
-                        kirby.vx = Math.cos(newAngle) * newSpeed;
-                        kirby.vy = Math.sin(newAngle) * newSpeed;
-                        kirby.cruiseSpeed = newSpeed;
+                        launchOrb(kirby, randomCruiseSpeed());
                         kirby.isDisappeared = false;
                     }
                 }, 2000);
@@ -127,6 +134,25 @@ if (!isPiscinePage) {
 
 const repulsionRadius = 160; 
 const repulsionStrength = 0.9; 
+const POOL_ORB_SPEED = 0.5; // Vitesse des orbes ajoutées depuis la piscine à balles
+
+// Ramène l'orbe vers sa vitesse de croisière, avance sa position et la fait rebondir sur les quatre bords.
+function updateOrb(orb) {
+    const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
+    if (currentSpeed > 0) {
+        const nextSpeed = currentSpeed + (orb.cruiseSpeed - currentSpeed) * 0.04;
+        orb.vx = (orb.vx / currentSpeed) * nextSpeed;
+        orb.vy = (orb.vy / currentSpeed) * nextSpeed;
+    }
+
+    orb.x += orb.vx;
+    orb.y += orb.vy;
+
+    if (orb.x - orb.radius < 0) { orb.x = orb.radius; orb.vx *= -1; }
+    if (orb.x + orb.radius > canvas.width) { orb.x = canvas.width - orb.radius; orb.vx *= -1; }
+    if (orb.y - orb.radius < 0) { orb.y = orb.radius; orb.vy *= -1; }
+    if (orb.y + orb.radius > canvas.height) { orb.y = canvas.height - orb.radius; orb.vy *= -1; }
+}
 
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -135,20 +161,7 @@ function animate() {
         if (orb.isKirby) {
             if (orb.isDisappeared || orb.isPermanentlyRemoved) return;
 
-            const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
-            if (currentSpeed > 0) {
-                const nextSpeed = currentSpeed + (orb.cruiseSpeed - currentSpeed) * 0.04; 
-                orb.vx = (orb.vx / currentSpeed) * nextSpeed;
-                orb.vy = (orb.vy / currentSpeed) * nextSpeed;
-            }
-
-            orb.x += orb.vx;
-            orb.y += orb.vy;
-
-            if (orb.x - orb.radius < 0) { orb.x = orb.radius; orb.vx *= -1; }
-            if (orb.x + orb.radius > canvas.width) { orb.x = canvas.width - orb.radius; orb.vx *= -1; }
-            if (orb.y - orb.radius < 0) { orb.y = orb.radius; orb.vy *= -1; }
-            if (orb.y + orb.radius > canvas.height) { orb.y = canvas.height - orb.radius; orb.vy *= -1; }
+            updateOrb(orb);
 
             ctx.save();
             ctx.globalAlpha = 0.2; 
@@ -180,20 +193,7 @@ function animate() {
                 orb.vy += Math.sin(angle) * force * repulsionStrength * direction;
             }
 
-            const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
-            if (currentSpeed > 0) {
-                const nextSpeed = currentSpeed + (orb.cruiseSpeed - currentSpeed) * 0.04; 
-                orb.vx = (orb.vx / currentSpeed) * nextSpeed;
-                orb.vy = (orb.vy / currentSpeed) * nextSpeed;
-            }
-
-            orb.x += orb.vx;
-            orb.y += orb.vy;
-
-            if (orb.x - orb.radius < 0) { orb.x = orb.radius; orb.vx *= -1; }
-            if (orb.x + orb.radius > canvas.width) { orb.x = canvas.width - orb.radius; orb.vx *= -1; }
-            if (orb.y - orb.radius < 0) { orb.y = orb.radius; orb.vy *= -1; }
-            if (orb.y + orb.radius > canvas.height) { orb.y = canvas.height - orb.radius; orb.vy *= -1; }
+            updateOrb(orb);
 
             ctx.globalAlpha = 0.45;
             ctx.fillStyle = currentBallColor;
@@ -206,6 +206,20 @@ function animate() {
     ctx.globalAlpha = 1.0; 
     requestAnimationFrame(animate);
 }
+
+// Ajoute count orbes normales à des positions et directions aléatoires.
+window.addOrbs = function(count) {
+    for (let i = 0; i < count; i++) {
+        orbs.push(createOrb(POOL_ORB_SPEED));
+    }
+};
+
+// Retire les count dernières orbes de la liste.
+window.removeOrbs = function(count) {
+    for (let i = 0; i < count && orbs.length > 0; i++) {
+        orbs.pop();
+    }
+};
 
 window.changeBackgroundParticlesColor = function(newHexColor) {
     currentBallColor = newHexColor;

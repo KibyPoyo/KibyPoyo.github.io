@@ -1,15 +1,24 @@
 const CRYPTO_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?";
 const SCRAMBLE_SPEED_MS = 32;       // Vitesse de mutation ambiante (texte rouge fermé)
 const DECRYPT_SPEED_MS = 25;        // Vitesse d'animation de décryptage/recryptage (texte vert)
-const VIRUS_ANIM_SPEED_MS = 1000;   // ⏱️ CADENCE DE L'ANIMATION SACCADÉE DU VIRUS (1000ms = 1s)
+const VIRUS_ANIM_SPEED_MS = 1000;   // Cadence de l'animation saccadée du virus
+
+// Mélange un array en place selon Fisher-Yates et le renvoie.
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
 
 function mutateRandomCharWithHeightControl(p) {
     const realText = p.dataset.originalText;
     if (!realText) return;
 
-    // Récupération ou initialisation de la hauteur de référence (le premier texte crypté)
+    // Hauteur de référence, mesurée à défaut lors du premier appel.
     let targetHeight = parseInt(p.dataset.targetHeight, 10);
-    if (!targetHeight || isNaN(targetHeight)) {
+    if (!targetHeight) {
         targetHeight = p.offsetHeight;
         p.dataset.targetHeight = targetHeight;
     }
@@ -27,19 +36,19 @@ function mutateRandomCharWithHeightControl(p) {
 
     let randIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
     
-    // Essai d'un caractère aléatoire de base
     let candidate = CRYPTO_CHARS.charAt(Math.floor(Math.random() * CRYPTO_CHARS.length));
     textArray[randIndex] = candidate;
     p.textContent = textArray.join("");
 
-    // ⚖️ Ajustement dynamique basé sur la hauteur mesurée dans le DOM
-    if (p.offsetHeight > targetHeight) {
-        // Trop long (la ligne a sauté / s'est élargie) -> On met un caractère court/fin
+    // Compense un changement de hauteur par un caractère plus étroit ou plus large.
+    // Une seule lecture : chaque accès à offsetHeight force un recalcul de mise en page.
+    const currentHeight = p.offsetHeight;
+
+    if (currentHeight > targetHeight) {
         const thinChars = "iljI!.,'|";
         textArray[randIndex] = thinChars.charAt(Math.floor(Math.random() * thinChars.length));
         p.textContent = textArray.join("");
-    } else if (p.offsetHeight < targetHeight) {
-        // Trop court -> On met un caractère long/large pour combler
+    } else if (currentHeight < targetHeight) {
         const wideChars = "mwMW@%#&WD";
         textArray[randIndex] = wideChars.charAt(Math.floor(Math.random() * wideChars.length));
         p.textContent = textArray.join("");
@@ -47,10 +56,10 @@ function mutateRandomCharWithHeightControl(p) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    chargerEtBatirParcours();
+    loadAndBuildTimeline();
 });
 
-async function chargerEtBatirParcours() {
+async function loadAndBuildTimeline() {
     try {
         const response = await fetch('data/resume.json');
         if (!response.ok) throw new Error("Impossible de charger le fichier resume.json");
@@ -59,9 +68,9 @@ async function chargerEtBatirParcours() {
         const container = document.getElementById('timeline-container');
         
         if (!container) return;
-        container.innerHTML = ""; // On efface le texte de chargement
+        container.innerHTML = ""; // Retire le message de chargement
 
-        // On rebâtit les rangées
+        // Une rangée par étape du parcours
         data.forEach((item) => {
             const row = document.createElement('div');
             row.className = `timeline-row ${item.side}`;
@@ -71,7 +80,7 @@ async function chargerEtBatirParcours() {
                 .join('');
 
             row.innerHTML = `
-                <div class="timeline-item-container" style="cursor: pointer;">
+                <div class="timeline-item-container">
                     <div class="timeline-header-band">
                         <div class="timeline-meta">
                             <span class="${item.badgeClass}">${item.badgeText}</span>
@@ -89,7 +98,6 @@ async function chargerEtBatirParcours() {
                 </div>
             `;
 
-            // 🎯 On attache l'événement proprement en pur JavaScript
             const itemContainer = row.querySelector('.timeline-item-container');
             itemContainer.addEventListener('click', (event) => {
                 if (event.target.closest('.timeline-content-inner')) {
@@ -101,18 +109,21 @@ async function chargerEtBatirParcours() {
             container.appendChild(row);
         });
 
-        initialiserVirusEtCryptage();
+        initVirusesAndScramble();
 
     } catch (error) {
         console.error("Erreur lors de la génération de la frise chronologique :", error);
         const container = document.getElementById('timeline-container');
         if (container) {
-            container.innerHTML = `<p style="text-align: center; color: #ff4a4a;">[ERREUR SYSTÈME] Échec du chargement du protocole Parcours.</p>`;
+            container.innerHTML = `<p class="timeline-status error-message">[ERREUR SYSTÈME] Échec du chargement du protocole Parcours.</p>`;
         }
+    } finally {
+        // Annonce la fin de la construction de la frise, succès ou échec.
+        document.dispatchEvent(new CustomEvent('parcours-pret'));
     }
 }
 
-function initialiserVirusEtCryptage() {
+function initVirusesAndScramble() {
     const items = document.querySelectorAll('.timeline-item-container');
     
     items.forEach((item, index) => {
@@ -135,6 +146,9 @@ function initialiserVirusEtCryptage() {
             const realText = tempDiv.textContent;
             p.dataset.originalText = realText;
 
+            // Hauteur de référence mesurée sur le vrai texte, avant tout brouillage.
+            p.dataset.targetHeight = p.offsetHeight;
+
             let initialScramble = "";
             for (let i = 0; i < realText.length; i++) {
                 if (realText[i] === " " || realText[i] === "\n") {
@@ -144,9 +158,6 @@ function initialiserVirusEtCryptage() {
                 }
             }
             p.textContent = initialScramble;
-
-            // 📏 Mémorisation de la hauteur de référence du premier texte crypté
-            p.dataset.targetHeight = p.offsetHeight;
         });
     });
 
@@ -180,6 +191,15 @@ function toggleTimeline(container) {
 
     container.dataset.isAnimating = "true";
 
+    // Le brouillage ambiant ne reprend qu'une fois tous les paragraphes animés.
+    let remainingAnimations = paragraphs.length;
+    const markAnimationDone = () => {
+        remainingAnimations--;
+        if (remainingAnimations === 0) {
+            container.dataset.isAnimating = "false";
+        }
+    };
+
     paragraphs.forEach(p => {
         const realText = p.dataset.originalText;
         const originalHtml = p.dataset.originalHtml;
@@ -194,7 +214,7 @@ function toggleTimeline(container) {
             }
         }
 
-        let assignedOrder = validIndices.sort(() => Math.random() - 0.5);
+        let assignedOrder = shuffleArray(validIndices);
         let countPerTick = Math.ceil(validIndices.length / 15); 
 
         if (isOpen) {
@@ -213,7 +233,7 @@ function toggleTimeline(container) {
                 if (assignedOrder.length === 0) {
                     clearInterval(p.cryptoInterval);
                     p.innerHTML = originalHtml;
-                    container.dataset.isAnimating = "false";
+                    markAnimationDone();
                 }
             }, DECRYPT_SPEED_MS);
 
@@ -233,16 +253,15 @@ function toggleTimeline(container) {
 
                 // Contrôle de hauteur pendant le recryptage à la fermeture
                 if (p.offsetHeight > targetHeight) {
-                    // Si ça dépasse, on ajuste légèrement
                     const thinChars = "iljI!.,'|";
-                    let randValid = validIndices[Math.floor(Math.random() * validIndices.length)];
-                    currentTextArray[randValid] = thinChars.charAt(Math.floor(Math.random() * thinChars.length));
+                    let randomValidIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
+                    currentTextArray[randomValidIndex] = thinChars.charAt(Math.floor(Math.random() * thinChars.length));
                     p.textContent = currentTextArray.join("");
                 }
 
                 if (assignedOrder.length === 0) {
                     clearInterval(p.cryptoInterval);
-                    container.dataset.isAnimating = "false";
+                    markAnimationDone();
                 }
             }, DECRYPT_SPEED_MS);
         }

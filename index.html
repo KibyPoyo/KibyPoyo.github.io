@@ -8,22 +8,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perottino Tony - Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
 
-    <header class="global-header">
-        <div class="nav-container">
-            <a href="#presentation" class="home-btn">Perottino Tony</a>
-            <nav class="categories-nav">
-                <a href="#presentation" class="category-btn active">Présentation</a>
-                <a href="#parcours" class="category-btn">Parcours</a>
-                <a href="#projets" class="category-btn">Projets</a>
-                <a href="#competences" class="category-btn">Compétences</a>
-            </nav>
-        </div>
-    </header>
+    <meta name="description" content="Portfolio de Perottino Tony, étudiant ingénieur à l'Ensimag : parcours, projets et compétences en IA, Big Data et développement logiciel.">
+
+    <!-- Open Graph : encart d'aperçu affiché par LinkedIn, Discord, WhatsApp, Slack... -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Perottino Tony">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:title" content="Perottino Tony - Portfolio">
+    <meta property="og:description" content="Portfolio de Perottino Tony, étudiant ingénieur à l'Ensimag : parcours, projets et compétences en IA, Big Data et développement logiciel.">
+    <meta property="og:url" content="https://kibypoyo.github.io/">
+    <meta property="og:image" content="https://kibypoyo.github.io/data/images/preview.png">
+
+    <link rel="icon" href="favicon.ico" sizes="32x32">
+    <link rel="icon" href="data/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data/images/favicon-180.png">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="home">
+
+    <div id="site-header"></div>
 
     <canvas id="bg-canvas"></canvas>
 
@@ -32,7 +37,7 @@
         <section id="presentation" class="portfolio-section">
             <div class="main-title-area">
                 <h1>Perottino Tony</h1>
-                <p class="profile-subtitle">Étudiant en 2A à l'ENSIMAG - 21 ans</p>
+                <p class="profile-subtitle">Étudiant en 2A à l'Ensimag - <span id="profile-age">21</span> ans</p>
             </div>
             <div class="placeholder-card">
                 <p id="presentation-text">Chargement de la présentation...</p>
@@ -42,7 +47,7 @@
         <section id="parcours" class="portfolio-section">
             <h2 class="section-title">Mon Parcours</h2>
             <div class="custom-timeline" id="timeline-container">
-                <p style="text-align: center; color: var(--text-muted);">Chargement du parcours...</p>
+                <p class="timeline-status">Chargement du parcours...</p>
             </div>
         </section>
         
@@ -51,12 +56,12 @@
             
             <div class="wheel-wrapper">
                 <div class="wheel" id="wheel"></div>
-                <div class="base-triangle"><span>Roue des projets</span></div>
+                <div class="base-triangle"><span>Roue des projets</span><div class="wheel-keys" id="wheel-keys"><span class="key-hint" aria-hidden="true">←</span><span class="project-counter" id="project-counter"></span><span class="key-hint" aria-hidden="true">→</span></div></div>
             </div>
 
             <div class="description-box">
                 <h2 id="project-title">Chargement...</h2>
-                <p id="project-subtitle" style="font-size: 0.9rem; opacity: 0.75; margin: -5px 0 15px 0; font-weight: 500;"></p>
+                <p id="project-subtitle"></p>
                 <p id="project-desc">Description...</p>
             </div>
         </section>
@@ -101,19 +106,9 @@
 
     </main>
 
-    <footer class="main-footer">
-        <div class="footer-links">
-            <a href="https://github.com/KibyPoyo" target="_blank">GitHub</a>
-            <a href="https://www.linkedin.com/in/tony-perottino-812a22325/" target="_blank">LinkedIn</a>
-            <a href="cv.html">CV</a>
-            
-            <a href="piscine_a_balles.html" class="btn-surprise">
-                Surprise
-            </a>
-        </div>
-        <p class="copyright">© 2026 Perottino Tony. Tous droits réservés.</p>
-    </footer>
+    <div id="site-footer"></div>
 
+    <script src="js/layout.js"></script>
     <script src="js/background.js"></script>
     <script src="js/wheel.js"></script>
     <script src="js/resume.js"></script>

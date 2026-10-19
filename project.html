@@ -4,22 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projet - Perottino Tony</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
 
-    <header class="global-header">
-        <div class="nav-container">
-            <a href="index.html#presentation" class="home-btn">Perottino Tony</a>
-            <nav class="categories-nav">
-                <a href="index.html#presentation" class="category-btn">Présentation</a>
-                <a href="index.html#parcours" class="category-btn">Parcours</a>
-                <a href="index.html#projets" class="category-btn active">Projets</a>
-                <a href="index.html#competences" class="category-btn">Compétences</a>
-            </nav>
-        </div>
-    </header>
+    <meta name="description" content="Détail d'un projet du portfolio de Perottino Tony, étudiant ingénieur à l'Ensimag.">
+
+    <!-- Open Graph : encart d'aperçu affiché par LinkedIn, Discord, WhatsApp, Slack... -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Perottino Tony">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:title" content="Projet - Perottino Tony">
+    <meta property="og:description" content="Détail d'un projet du portfolio de Perottino Tony, étudiant ingénieur à l'Ensimag.">
+    <meta property="og:url" content="https://kibypoyo.github.io/project.html">
+    <meta property="og:image" content="https://kibypoyo.github.io/data/images/preview.png">
+
+    <link rel="icon" href="favicon.ico" sizes="32x32">
+    <link rel="icon" href="data/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data/images/favicon-180.png">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="project">
+
+    <div id="site-header"></div>
 
     <canvas id="bg-canvas"></canvas>
 
@@ -34,26 +39,17 @@
             <div class="placeholder-card">
                 <div id="dynamic-project-desc"></div>
                 
-                <div style="margin-top: 30px;">
-                    <a href="index.html#projets" class="category-btn" style="display: inline-block; text-decoration: none;">◄ Retour aux projets</a>
+                <div class="btn-row">
+                    <a href="index.html#projets" class="category-btn btn-inline">◄ Retour aux projets</a>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="main-footer">
-        <div class="footer-links">
-            <a href="https://github.com/KibyPoyo" target="_blank">GitHub</a>
-            <a href="https://www.linkedin.com/in/tony-perottino-812a22325/" target="_blank">LinkedIn</a>
-            <a href="cv.html">CV</a>
-            
-            <a href="piscine_a_balles.html" class="btn-surprise">
-                Surprise
-            </a>
-        </div>
-        <p class="copyright">© 2026 Perottino Tony. Tous droits réservés.</p>
-    </footer>
+    <div id="site-footer"></div>
 
+    <!-- effect.js remplace window.fetch pour servir le projet secret : il doit s'exécuter avant DOMContentLoaded, où projects.js lit projects.json -->
+    <script src="js/layout.js"></script>
     <script src="js/background.js"></script>
     <script src="js/effect.js"></script>
     <script src="js/projects.js"></script>

@@ -4,43 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV - Perottino Tony</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
 
-    <header class="global-header">
-        <div class="nav-container">
-            <a href="index.html#presentation" class="home-btn">Perottino Tony</a>
-            <nav class="categories-nav">
-                <a href="index.html#presentation" class="category-btn">Présentation</a>
-                <a href="index.html#parcours" class="category-btn">Parcours</a>
-                <a href="index.html#projets" class="category-btn">Projets</a>
-                <a href="index.html#competences" class="category-btn">Compétences</a>
-            </nav>
-        </div>
-    </header>
+    <meta name="description" content="CV de Perottino Tony, étudiant ingénieur à l'Ensimag : formation, stage et compétences en mathématiques appliquées et en informatique.">
+
+    <!-- Open Graph : encart d'aperçu affiché par LinkedIn, Discord, WhatsApp, Slack... -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Perottino Tony">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:title" content="CV - Perottino Tony">
+    <meta property="og:description" content="CV de Perottino Tony, étudiant ingénieur à l'Ensimag : formation, stage et compétences en mathématiques appliquées et en informatique.">
+    <meta property="og:url" content="https://kibypoyo.github.io/cv.html">
+    <meta property="og:image" content="https://kibypoyo.github.io/data/images/preview.png">
+
+    <link rel="icon" href="favicon.ico" sizes="32x32">
+    <link rel="icon" href="data/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data/images/favicon-180.png">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="cv">
+
+    <div id="site-header"></div>
 
     <canvas id="bg-canvas"></canvas>
 
-    <main class="portfolio-band" style="min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 100px; padding-bottom: 40px; box-sizing: border-box;">
-        <div style="max-width: 850px; width: 100%; text-align: center;">
+    <main class="portfolio-band cv-viewer">
+        <div class="cv-frame-wrap">
             <iframe src="data/CV.pdf#toolbar=0&navpanes=0&view=FitH"
                     title="CV de Perottino Tony"
-                    style="width: 100%; aspect-ratio: 1 / 1.414; border: none; border-radius: 8px; box-shadow: 0 4px 25px rgba(0,0,0,0.4); margin-bottom: 25px; background: #ffffff;">
-                <p style="color: #ffffff;">
-                    Impossible d'afficher le PDF sur votre navigateur.
-                    <a href="data/CV.pdf" style="color: #3498db;">Ouvrir le CV</a>
-                </p>
-            </iframe>
+                    class="cv-frame"></iframe>
             <div>
-                <a href="data/CV.pdf" download class="category-btn" style="text-decoration: none; display: inline-block;">
-                    <i class="fas fa-download"></i> Télécharger le PDF
+                <a href="data/CV.pdf" download class="category-btn btn-inline">
+                    <span class="icon icon-download" aria-hidden="true"></span> Télécharger le PDF
                 </a>
             </div>
+            <p class="cv-frame-fallback">
+                Impossible d'afficher la prévisualisation ?
+                <a href="data/CV.pdf" target="_blank">Ouvrir le CV dans un nouvel onglet</a>
+            </p>
         </div>
     </main>
 
+    <div id="site-footer"></div>
+
+    <script src="js/layout.js"></script>
     <script src="js/background.js"></script>
 </body>
 </html>

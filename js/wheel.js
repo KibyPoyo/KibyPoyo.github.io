@@ -1,112 +1,138 @@
 /* ==========================================================================
-   WHEEL.JS - LOGIQUE LINÉAIRE, CARRÉ & LETTER-SPACING SANS FADE
+   WHEEL.JS - ROUE DES PROJETS
+
+   Six emplacements espacés de 60°, cinq visibles et un caché au sommet,
+   masqué par le triangle sombre posé par-dessus. Chaque triangle a un rang
+   fixe (entier non replié) : le triangle de rang n montre le projet
+   wrapIndex(n) et se trouve en bas quand la position de la roue vaut n.
+   Tous les angles se déduisent de cette seule position : la roue tourne
+   d'un seul tenant, et un clic en pleine rotation la relance depuis là où
+   elle se trouve. Les triangles qui atteignent le sommet sont détruits
+   (sortants), d'autres en sortent (entrants).
+   ========================================================================== */
+
+/* ==========================================================================
+   CONFIGURATION
+   ========================================================================== */
+
+const ANGLE_PER_SLOT = 60;
+const HALF_TURN = 180 / ANGLE_PER_SLOT;   // Crans entre le bas et le sommet
+const ANIMATION_DURATION = 600;   // Durée d'une rotation, en millisecondes
+const TEXT_SWAP_DELAY = 300;      // Instant où le texte sous la roue bascule
+const ACTIVE_SCALE = 1.3;         // Agrandissement du triangle du bas
+const TEXT_STRETCH_SCALE = 1.15;  // Étirement horizontal du texte pendant la bascule
+
+// Courbe de toutes les animations de la roue. Le CSS des lignes de texte (.slice span div) la reprend.
+const EASING_POINTS = [0.25, 1, 0.5, 1];
+const EASING = `cubic-bezier(${EASING_POINTS.join(', ')})`;
+
+// Géométrie d'un triangle, en pixels. Doit rester accordée au CSS de .slice.
+const SLICE_WIDTH = 254;
+const SLICE_HEIGHT = 220;
+const LINE_HEIGHT = 18;
+const CHAR_WIDTH = 9.1;   // Largeur moyenne d'un caractère, pour estimer les coupures
+
+// Découpe du triangle par le clip-path de .slice : pointe à 12px du haut, base rentrée de 8px de chaque côté.
+const CLIP_TOP = 12;
+const CLIP_SIDE = 8;
+const TEXT_HEIGHT_RATIO = 0.75;   // Part de la hauteur du triangle réservée au texte
+const TEXT_SIDE_MARGIN = 16;      // Marge horizontale totale d'une ligne de texte
+
+
+/* ==========================================================================
+   ÉTAT
    ========================================================================== */
 
 let projects = [];
 let totalProjects = 0;
-let currentIndex = 0;
-let isAnimating = false;
 
-const ANGLE_PER_SLOT = 60;
-const ANIMATION_DURATION = 600; // Durée fixe de l'animation en millisecondes (0.6 seconde)
-const ACTIVE_SCALE = 1.3;        // Facteur d'agrandissement pour le triangle actif (en bas)
-const TEXT_STRETCH_SCALE = 1.15; // Constante pour accentuer l'effet d'étirement horizontal
+// Rang amené (ou en train d'être amené) en bas.
+let target = 0;
 
-/* ==========================================================================
-   CONFIGURATION CENTRALE DES SLOTS (SCALABLE)
-   ========================================================================== */
-const SLOTS_CONFIG = {
-    0: { name: 'Bas',       angle: 0,   diff: 0,  isHidden: false, clickable: true  }, // Slot actif (plus gros et cliquable vers une page)
-    1: { name: 'Bas-gauche',  angle: 60,  diff: -1, isHidden: false, clickable: true  },
-    2: { name: 'Haut-gauche',  angle: 120, diff: -2, isHidden: false, clickable: true  },
-    3: { name: 'Haut',        angle: 180, diff: 3,  isHidden: true,  clickable: false }, // Slot caché / sommet
-    4: { name: 'Haut-droite',  angle: 240, diff: 2,  isHidden: false, clickable: true  },
-    5: { name: 'Bas-droite',   angle: 300, diff: 1,  isHidden: false, clickable: true  }
-};
+// Rotation en cours : la position va de from à to, selon EASING, à partir de start
+// (horloge des animations). null à l'arrêt.
+let motion = null;
+let isTicking = false;
 
-const TOTAL_SLOTS = Object.keys(SLOTS_CONFIG).length;
-const ACTIVE_SLOTS_ORDER = [2, 1, 0, 5, 4];
+// Triangles affichés, par rang : { element, rank, scaleFrom, scaleTo, animation }
+const slices = new Map();
 
 const wheel = document.getElementById('wheel');
 const titleElement = document.getElementById('project-title');
+const subtitleElement = document.getElementById('project-subtitle');
 const descElement = document.getElementById('project-desc');
-
-let activeSlices = [];
-
-const getIndex = i =>
-    ((i % totalProjects) + totalProjects) % totalProjects;
+const counterElement = document.getElementById('project-counter');
+const keysHint = document.getElementById('wheel-keys');
 
 
 /* ==========================================================================
-   CALCUL DYNAMIQUE CUBIC-BEZIER & CONSTANTE OPTIMISÉE
+   OUTILS
    ========================================================================== */
 
-function getCubicBezierTime(targetY, x1, y1, x2, y2) {
-    let u = targetY;
-    for (let i = 0; i < 15; i++) {
-        const currentY = 3 * Math.pow(1 - u, 2) * u * y1 + 3 * (1 - u) * Math.pow(u, 2) * y2 + Math.pow(u, 3);
-        const derivativeY = 3 * (1 - u) * (1 - 3 * u) * y1 + 3 * u * (2 - 3 * u) * y2 + 3 * u * u;
-        
-        if (Math.abs(currentY - targetY) < 1e-7) break;
-        if (Math.abs(derivativeY) < 1e-7) break;
-        
-        u -= (currentY - targetY) / derivativeY;
-        u = Math.max(0, Math.min(1, u));
-    }
-    return 3 * Math.pow(1 - u, 2) * u * x1 + 3 * (1 - u) * Math.pow(u, 2) * x2 + Math.pow(u, 3);
+// Ramène un indice de projet dans les bornes de la liste.
+function wrapIndex(i) {
+    return ((i % totalProjects) + totalProjects) % totalProjects;
 }
 
-// Constante pré-calculée pour le mitan (fraction 0.5) avec cubic-bezier(0.25, 1, 0.5, 1)
-const BEZIER_HALF_TIME = getCubicBezierTime(0.5, 0.25, 1, 0.5, 1);
-
-
-/* ==========================================================================
-   CALCUL DES PROJETS & NAVIGATION
-   ========================================================================== */
-
-function getProjectIndex(slotIndex, baseIndex) {
-    const slot = SLOTS_CONFIG[slotIndex];
-    if (!slot) return baseIndex;
-    return getIndex(baseIndex + slot.diff);
-}
-
-function openCurrentProject() {
-    if (!projects.length) return;
-    const currentProj = projects[currentIndex];
-    if (!currentProj) return;
-
-    if (currentProj.link) {
-        window.location.href = currentProj.link;
-        return;
-    }
-
-    const id = currentProj.title
+// Transforme un titre en identifiant d'adresse. Doit rester identique à projects.js.
+function slugFromTitle(title) {
+    return title
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
         .toLowerCase()
         .trim()
-        .replace(/[\s\-]+/g, '_')
-        .replace(/[^a-z0-9_]/g, '');
+        .replace(/['’\s\-]+/g, '_')
+        .replace(/[^a-z0-9_]/g, '')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '');
+}
 
-    window.location.href = `project.html?id=${id}`;
+// Transformation d'un triangle situé à `offset` crans du bas.
+function transformOf(offset, scale) {
+    return `rotate(${offset * ANGLE_PER_SLOT}deg) scale(${scale})`;
 }
 
 
 /* ==========================================================================
-   INITIALISATION GLOBALE
+   COURBE D'ANIMATION
+
+   Le navigateur anime les triangles ; le script a besoin de savoir où en est
+   la roue à un instant donné (pour créer, détruire ou relancer). Il évalue la
+   même cubic-bezier : on cherche le paramètre dont l'abscisse vaut la fraction
+   de durée écoulée (méthode de Newton), puis on lit son ordonnée.
    ========================================================================== */
 
-function initWheel() {
-    fetch('data/projects.json')
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then(data => {
-            projects = data;
-            totalProjects = data.length;
-            currentIndex = 0;
+function bezier(u, p1, p2) {
+    return 3 * (1 - u) * (1 - u) * u * p1 + 3 * (1 - u) * u * u * p2 + u * u * u;
+}
 
-            renderWheelInstant();
-        })
-        .catch(err =>
-            console.error('Erreur chargement projets :', err)
-        );
+function bezierSlope(u, p1, p2) {
+    return 3 * (1 - u) * (1 - 3 * u) * p1 + 3 * u * (2 - 3 * u) * p2 + 3 * u * u;
+}
+
+function easeAt(timeFraction) {
+    const [x1, y1, x2, y2] = EASING_POINTS;
+    let u = timeFraction;
+
+    for (let i = 0; i < 15; i++) {
+        const error = bezier(u, x1, x2) - timeFraction;
+        const slope = bezierSlope(u, x1, x2);
+
+        if (Math.abs(error) < 1e-7 || Math.abs(slope) < 1e-7) break;
+
+        u = Math.max(0, Math.min(1, u - error / slope));
+    }
+
+    return bezier(u, y1, y2);
+}
+
+// Avancement de la rotation en cours (0 à 1) à l'instant time ; 1 à l'arrêt.
+function progressAt(time) {
+    return motion ? easeAt(Math.min(1, (time - motion.start) / ANIMATION_DURATION)) : 1;
+}
+
+function positionAt(time) {
+    return motion ? motion.from + (motion.to - motion.from) * progressAt(time) : target;
 }
 
 
@@ -114,511 +140,285 @@ function initWheel() {
    FABRICATION D'UN TRIANGLE
    ========================================================================== */
 
-function applyHoverStateInstant(sliceElement) {
-    sliceElement.classList.add('is-hovered');
+function createSlice(rank) {
+    const project = projects[wrapIndex(rank)];
+    const element = document.createElement('div');
+    element.className = 'slice';
+    element.innerHTML = '<span></span>';
+    element.style.backgroundColor = project.color;
+    element.dataset.projectTitle = project.title;
 
-    const span = sliceElement.querySelector('span');
-    if (span) {
-        span.querySelectorAll('div').forEach(div => {
-            div.style.transition = 'none';
-            div.style.letterSpacing = '2px';
-            div.style.transform = 'scale(0.92)';
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    div.style.transition = 'letter-spacing 300ms cubic-bezier(0.25, 1, 0.5, 1), transform 300ms cubic-bezier(0.25, 1, 0.5, 1)';
-                });
-            });
-        });
-    }
+    const span = element.querySelector('span');
+    span.innerText = project.title;
+    wrapTextIntoTriangle(element);
+
+    element.addEventListener('mouseenter', () => setTextHover(element, true));
+    element.addEventListener('mouseleave', () => setTextHover(element, false));
+
+    // Un triangle cliqué est amené en bas, même en pleine rotation ; arrivé en bas, il ouvre son projet.
+    element.addEventListener('click', event => {
+        event.stopPropagation();
+        if (rank !== target) turnTo(rank);
+        else if (!motion) openCurrentProject();
+    });
+
+    return element;
 }
 
-function createSliceElement(slotIndex, project) {
-    const sliceElement = document.createElement('div');
-    sliceElement.className = 'slice visible';
-    sliceElement.innerHTML = '<span></span>';
-    applySliceContent(sliceElement, project);
+// Signale le survol au CSS, qui écarte les lettres (.slice.is-hovered span div).
+function setTextHover(element, hovered) {
+    element.classList.toggle('is-hovered', hovered);
+}
 
-    const slotConfig = SLOTS_CONFIG[slotIndex];
-    const isActive = (slotIndex === 0);
+function addSlice(rank) {
+    const slice = { element: createSlice(rank), rank, scaleFrom: 1, scaleTo: 1, animation: null };
+    slices.set(rank, slice);
+    placeSlice(slice);
+    wheel.appendChild(slice.element);
+}
 
-    sliceElement.classList.toggle('active', isActive);
-    sliceElement.style.zIndex = isActive ? '5' : '2';
+// Pose l'état final d'un triangle et, pendant une rotation, l'anime depuis le début
+// de celle-ci : un triangle créé en cours de route part directement du bon point.
+function placeSlice(slice) {
+    const { element, rank } = slice;
+    const isActive = rank === target;
 
-    sliceElement.addEventListener('mouseenter', () => {
-        sliceElement.classList.add('is-hovered');
-        const span = sliceElement.querySelector('span');
-        if (span) {
-            const lineDivs = span.querySelectorAll('div');
-            lineDivs.forEach(div => {
-                div.style.letterSpacing = '2px';
-                div.style.transform = 'scale(0.92)';
-            });
-        }
-    });
+    element.classList.toggle('active', isActive);
+    slice.scaleTo = isActive ? ACTIVE_SCALE : 1;
+    element.style.transform = transformOf(target - rank, slice.scaleTo);
 
-    sliceElement.addEventListener('mouseleave', () => {
-        sliceElement.classList.remove('is-hovered');
-        const span = sliceElement.querySelector('span');
-        if (span) {
-            const lineDivs = span.querySelectorAll('div');
-            lineDivs.forEach(div => {
-                div.style.letterSpacing = '0px';
-                div.style.transform = 'scale(1)';
-            });
-        }
-    });
+    if (slice.animation) slice.animation.cancel();
+    if (!motion) return;
 
-    sliceElement.addEventListener('click', e => {
-        e.stopPropagation();
-        if (isAnimating) return;
-
-        if (slotIndex === 0) {
-            openCurrentProject();
-            return;
-        }
-
-        if (!slotConfig.clickable) return;
-
-        let steps = slotConfig.diff;
-        rotateBy(steps);
-    });
-
-    return sliceElement;
+    slice.animation = element.animate(
+        [{ transform: transformOf(motion.from - rank, slice.scaleFrom) }, { transform: element.style.transform }],
+        { duration: ANIMATION_DURATION, easing: EASING }
+    );
+    slice.animation.startTime = motion.start;
 }
 
 
 /* ==========================================================================
-   RENDU INSTANTANÉ (INITIALISATION)
+   CONSTRUCTION DE LA ROUE
+
+   Appelée une seule fois au chargement. Reste accessible comme filet de
+   sécurité : buildWheel() remet la roue d'aplomb sur l'état courant.
    ========================================================================== */
 
-function renderWheelInstant() {
-    if (!totalProjects) return;
+function buildWheel() {
+    if (!wheel || !totalProjects) return;
 
     wheel.innerHTML = '';
-    activeSlices = [];
+    slices.clear();
+    motion = null;
 
-    ACTIVE_SLOTS_ORDER.forEach(slotIndex => {
-        const projectIndex = getProjectIndex(slotIndex, currentIndex);
-        const project = projects[projectIndex];
-        const sliceElement = createSliceElement(slotIndex, project);
-        const slotConfig = SLOTS_CONFIG[slotIndex];
+    for (let rank = target - HALF_TURN + 1; rank < target + HALF_TURN; rank++) addSlice(rank);
 
-        const scale = (slotIndex === 0) ? ` scale(${ACTIVE_SCALE})` : '';
-        sliceElement.style.transform = `rotate(${slotConfig.angle}deg)${scale}`;
-        sliceElement.style.transition = 'none';
-        sliceElement.style.opacity = '1';
-
-        wheel.appendChild(sliceElement);
-
-        requestAnimationFrame(() => {
-            if (sliceElement.matches(':hover')) {
-                applyHoverStateInstant(sliceElement);
-            }
-        });
-
-        activeSlices.push({
-            element: sliceElement,
-            slotIndex: slotIndex,
-            projectIndex: projectIndex
-        });
-    });
-
-    updateTextDescription(currentIndex, false);
-}
-
-function applySliceContent(sliceElement, project) {
-    if (!project) return;
-    sliceElement.style.backgroundColor = project.color;
-
-    if (sliceElement.dataset.projectTitle === project.title)
-        return;
-
-    sliceElement.dataset.projectTitle = project.title;
-
-    const span = sliceElement.querySelector('span');
-
-    if (span) {
-        span.innerText = project.title;
-        wrapTextIntoTriangle(sliceElement);
-    }
+    updateTextDescription(wrapIndex(target), false);
 }
 
 
 /* ==========================================================================
-   DESCRIPTION & ANIMATION OPTIMISÉE (SANS FADE & SANS LAG)
+   ENCART DE DESCRIPTION SOUS LA ROUE
    ========================================================================== */
+
+function writeDescription(project) {
+    if (titleElement) titleElement.textContent = project.title;
+
+    if (subtitleElement) {
+        subtitleElement.textContent = project.subtitle
+            ? `${project.subtitle} - ${project.date || ''}`
+            : project.date || '';
+    }
+
+    if (descElement) descElement.innerHTML = project.short_desc;
+}
+
+// Affiche la position du projet courant dans la liste, par exemple 3/12.
+function writeCounter(index) {
+    if (counterElement) counterElement.textContent = `${index + 1}/${totalProjects}`;
+}
 
 function updateTextDescription(index, animate = true) {
     if (!totalProjects) return;
 
     const project = projects[index];
-    const subtitle = document.getElementById('project-subtitle');
-    const elementsToAnimate = [titleElement, subtitle, descElement].filter(Boolean);
-
-    if (!animate) {
-        if (titleElement) titleElement.textContent = project.title;
-        if (subtitle) {
-            subtitle.textContent = project.subtitle
-                ? `${project.subtitle} - ${project.date || ''}`
-                : project.date || '';
-        }
-        if (descElement) descElement.innerHTML = project.short_desc;
-        if (window.changeBackgroundParticlesColor && project.color) {
-            window.changeBackgroundParticlesColor(project.color);
-        }
-        return;
-    }
-
-    // Phase 1 : Expansion horizontale accentuée et réduction (GPU)
-    elementsToAnimate.forEach(el => {
-        el.style.transition = 'transform 300ms cubic-bezier(0.25, 1, 0.5, 1)';
-        el.style.opacity = '1';
-        el.style.transform = `scaleX(${TEXT_STRETCH_SCALE}) scale(0.95)`;
-    });
-
-    // Phase 2 : Mise à jour du contenu au milieu et retour à la normale
-    setTimeout(() => {
-        if (titleElement)
-            titleElement.textContent = project.title;
-
-        if (subtitle) {
-            subtitle.textContent = project.subtitle
-                ? `${project.subtitle} - ${project.date || ''}`
-                : project.date || '';
-        }
-
-        if (descElement)
-            descElement.innerHTML = project.short_desc;
-
-        elementsToAnimate.forEach(el => {
-            el.style.opacity = '1';
-            el.style.transform = 'scaleX(1) scale(1)';
-        });
-    }, 300);
 
     if (window.changeBackgroundParticlesColor && project.color) {
         window.changeBackgroundParticlesColor(project.color);
     }
-}
 
-
-/* ==========================================================================
-   GESTION DES MOUVEMENTS & TIMINGS
-   ========================================================================== */
-
-function assign_movements(steps) {
-    const nextIndex = getIndex(currentIndex + steps);
-    const absSteps = Math.abs(steps);
-    const maxDuration = ANIMATION_DURATION; // Durée fixe globale
-
-    let persistingSlices = [];
-    let outgoingSlices = [];
-    let rawIncomingSlots = [];
-
-    const hiddenSlotEntry = Object.entries(SLOTS_CONFIG).find(([k, v]) => v.isHidden);
-    const hiddenSlotIndex = hiddenSlotEntry ? parseInt(hiddenSlotEntry[0]) : 3;
-    const hiddenSlotConfig = SLOTS_CONFIG[hiddenSlotIndex];
-    const initialEnteringAngle = hiddenSlotConfig ? hiddenSlotConfig.angle : 180;
-
-    // 1. Analyse des triangles actifs (persistants ou traversant le sommet)
-    for (let i = 0; i < activeSlices.length; i++) {
-        const slice = activeSlices[i];
-        const currentConfig = SLOTS_CONFIG[slice.slotIndex];
-        const currentAngle = currentConfig.angle;
-
-        let stepsToTop = 0;
-        for (let d = 1; d <= absSteps; d++) {
-            const slotAtStep = (slice.slotIndex + (steps > 0 ? d : -d) + TOTAL_SLOTS) % TOTAL_SLOTS;
-            if (SLOTS_CONFIG[slotAtStep] && SLOTS_CONFIG[slotAtStep].isHidden) {
-                stepsToTop = d;
-                break;
-            }
-        }
-
-        const targetAngle = currentAngle + (steps * ANGLE_PER_SLOT);
-        const newSlot = (slice.slotIndex + steps + TOTAL_SLOTS) % TOTAL_SLOTS;
-        const targetScale = (newSlot === 0) ? ` scale(${ACTIVE_SCALE})` : '';
-        const targetTransform = `rotate(${targetAngle}deg)${targetScale}`;
-
-        if (stepsToTop > 0) {
-            const fraction = stepsToTop / absSteps;
-            const timeFraction = (fraction === 0.5) ? BEZIER_HALF_TIME : getCubicBezierTime(fraction, 0.25, 1, 0.5, 1);
-            const hitTopTime = timeFraction * maxDuration;
-
-            outgoingSlices.push({
-                element: slice.element,
-                targetTransform: targetTransform,
-                duration: maxDuration,
-                delay: 0,
-                hitTopTime: hitTopTime
-            });
-        } else {
-            persistingSlices.push({
-                element: slice.element,
-                targetTransform: targetTransform,
-                duration: maxDuration,
-                delay: 0,
-                newSlot: newSlot,
-                isActive: (newSlot === 0)
-            });
-        }
+    if (!animate) {
+        writeDescription(project);
+        writeCounter(index);
+        return;
     }
 
-    // 2. Configuration des slots entrants depuis le slot caché (synchronisés avec la courbe)
-    for (let i = 0; i < absSteps; i++) {
-        const distance = i + 1;
-        const enteringSlot = (hiddenSlotIndex + (steps > 0 ? distance : -distance) + TOTAL_SLOTS) % TOTAL_SLOTS;
-        rawIncomingSlots.push({ slot: enteringSlot, distance: distance });
-    }
+    const animated = [titleElement, subtitleElement, descElement].filter(Boolean);
 
-    const incomingSlices = rawIncomingSlots.map(item => {
-        const enteringSlot = item.slot;
-        const distance = item.distance;
-
-        let delay = 0;
-        let duration = maxDuration;
-
-        if (distance < absSteps) {
-            const fraction = (absSteps - distance) / absSteps;
-            const timeFraction = (fraction === 0.5) ? BEZIER_HALF_TIME : getCubicBezierTime(fraction, 0.25, 1, 0.5, 1);
-            delay = timeFraction * maxDuration;
-            duration = maxDuration - delay;
-        }
-
-        const enteringProjectIndex = getProjectIndex(enteringSlot, nextIndex);
-        const enteringProject = projects[enteringProjectIndex];
-
-        const element = createSliceElement(enteringSlot, enteringProject);
-        element.style.transform = `rotate(${initialEnteringAngle}deg)`;
-        element.style.opacity = '1';
-        element.style.transition = 'none';
-
-        const targetAngle = SLOTS_CONFIG[enteringSlot].angle;
-        const targetScale = (enteringSlot === 0) ? ` scale(${ACTIVE_SCALE})` : '';
-        const targetTransform = `rotate(${targetAngle}deg)${targetScale}`;
-
-        return {
-            element: element,
-            isEntering: true,
-            targetTransform: targetTransform,
-            duration: duration,
-            delay: delay,
-            newSlot: enteringSlot,
-            isActive: (enteringSlot === 0),
-            projectIndex: enteringProjectIndex
-        };
+    // Étirement, puis bascule du contenu à mi-course et retour à la normale.
+    animated.forEach(el => {
+        el.style.transition = `transform ${TEXT_SWAP_DELAY}ms ${EASING}`;
+        el.style.transform = `scaleX(${TEXT_STRETCH_SCALE}) scale(0.95)`;
     });
-
-    const allAnims = [...persistingSlices, ...incomingSlices];
-    const newActiveSlices = ACTIVE_SLOTS_ORDER.map(slotIndex => {
-        const projIdx = getProjectIndex(slotIndex, nextIndex);
-        const anim = allAnims.find(a => a.newSlot === slotIndex);
-        return {
-            element: anim.element,
-            slotIndex: slotIndex,
-            projectIndex: projIdx
-        };
-    });
-
-    return {
-        nextIndex,
-        maxDuration,
-        persistingSlices,
-        outgoingSlices,
-        incomingSlices,
-        newActiveSlices
-    };
-}
-
-
-/* ==========================================================================
-   EXÉCUTION DES MOUVEMENTS
-   ========================================================================== */
-
-function move_all_triangles(movementMap) {
-    movementMap.incomingSlices.forEach(anim => {
-        wheel.appendChild(anim.element);
-        requestAnimationFrame(() => {
-            if (anim.element.matches(':hover')) {
-                applyHoverStateInstant(anim.element);
-            }
-        });
-    });
-
-    void wheel.offsetHeight;
-
-    // Triangles persistants
-    movementMap.persistingSlices.forEach(anim => {
-        const el = anim.element;
-        el.style.transition = `transform ${anim.duration}ms cubic-bezier(0.25, 1, 0.5, 1) ${anim.delay}ms`;
-        el.style.transform = anim.targetTransform;
-        el.style.opacity = '1';
-        el.classList.toggle('active', anim.isActive);
-        el.style.zIndex = anim.isActive ? '5' : '2';
-    });
-
-    // Triangles entrants
-    movementMap.incomingSlices.forEach(anim => {
-        const el = anim.element;
-        el.style.transition = `transform ${anim.duration}ms cubic-bezier(0.25, 1, 0.5, 1) ${anim.delay}ms`;
-        el.style.transform = anim.targetTransform;
-        el.style.opacity = '1';
-        el.classList.toggle('active', anim.isActive);
-        el.style.zIndex = anim.isActive ? '5' : '2';
-    });
-
-    // Triangles sortants : détruits exactement au moment où ils atteignent le sommet (Slot 3)
-    movementMap.outgoingSlices.forEach(anim => {
-        const el = anim.element;
-        el.style.transition = `transform ${anim.duration}ms cubic-bezier(0.25, 1, 0.5, 1) ${anim.delay}ms`;
-        el.style.transform = anim.targetTransform;
-        el.style.opacity = '1';
-
-        setTimeout(() => {
-            if (el.parentNode) {
-                el.parentNode.removeChild(el);
-            }
-        }, anim.hitTopTime);
-    });
-
-    activeSlices = movementMap.newActiveSlices;
 
     setTimeout(() => {
-        currentIndex = movementMap.nextIndex;
-        renderWheelInstant();
-        isAnimating = false;
-    }, movementMap.maxDuration);
+        writeDescription(project);
+        writeCounter(index);
+        animated.forEach(el => {
+            el.style.transform = 'scaleX(1) scale(1)';
+        });
+    }, TEXT_SWAP_DELAY);
+}
+
+// Remplace l'encart par un message d'échec de chargement.
+function showWheelError() {
+    if (titleElement) titleElement.textContent = '[ERREUR SYSTÈME]';
+    if (subtitleElement) subtitleElement.textContent = 'Accès refusé au protocole Projets';
+    if (descElement) descElement.innerHTML = 'Échec du chargement du protocole Projets.';
+    if (keysHint) keysHint.hidden = true;
 }
 
 
 /* ==========================================================================
-   ROTATION PRINCIPALE
+   ROTATION
    ========================================================================== */
 
+// Amène le rang `rank` en bas. En pleine rotation, la roue repart de sa position
+// et de ses agrandissements du moment, sans attendre la fin du mouvement.
+function turnTo(rank) {
+    const now = document.timeline.currentTime;
+    const progress = progressAt(now);
+    const from = positionAt(now);
+
+    slices.forEach(slice => { slice.scaleFrom += (slice.scaleTo - slice.scaleFrom) * progress; });
+
+    target = rank;
+    motion = { from, to: rank, start: now };
+    slices.forEach(placeSlice);
+    updateTextDescription(wrapIndex(target), true);
+
+    if (!isTicking) {
+        isTicking = true;
+        requestAnimationFrame(tick);
+    }
+}
+
+// À chaque image d'une rotation : détruit les triangles arrivés au sommet, crée ceux
+// qui en sortent. Un triangle existe tant qu'il est à moins d'un demi-tour du bas.
+function tick() {
+    const now = document.timeline.currentTime;
+    const position = positionAt(now);
+
+    slices.forEach(slice => {
+        if (Math.abs(position - slice.rank) < HALF_TURN) return;
+        slice.element.remove();
+        slices.delete(slice.rank);
+    });
+
+    for (let rank = Math.ceil(position - HALF_TURN); rank <= Math.floor(position + HALF_TURN); rank++) {
+        if (Math.abs(position - rank) < HALF_TURN && !slices.has(rank)) addSlice(rank);
+    }
+
+    if (now - motion.start < ANIMATION_DURATION) {
+        requestAnimationFrame(tick);
+        return;
+    }
+
+    motion = null;
+    isTicking = false;
+}
+
+// Ajoute des crans à la rotation, même en cours de route : la roue repart d'où elle est.
 function rotateBy(steps) {
-    if (!totalProjects || !steps || isAnimating) return;
-
-    isAnimating = true;
-
-    const nextIndex = getIndex(currentIndex + steps);
-
-    updateTextDescription(nextIndex, true);
-
-    const movementMap = assign_movements(steps);
-    move_all_triangles(movementMap);
+    if (!totalProjects || !steps) return;
+    turnTo(target + steps);
 }
-
-
-/* ==========================================================================
-   API
-   ========================================================================== */
 
 const rotateLeft = () => rotateBy(-1);
 const rotateRight = () => rotateBy(1);
-const rotateByFunc = rotateBy;
 
-window.rotateLeft = rotateLeft;
-window.rotateRight = rotateRight;
-window.rotateBy = rotateByFunc;
+
+/* ==========================================================================
+   OUVERTURE D'UN PROJET
+   ========================================================================== */
+
+function openCurrentProject() {
+    const project = projects[wrapIndex(target)];
+    if (!project) return;
+
+    window.location.href = `project.html?id=${slugFromTitle(project.title)}`;
+}
 
 
 /* ==========================================================================
    TEXTE DANS LES TRIANGLES
+
+   Le triangle s'élargit vers le bas : chaque ligne dispose donc d'une largeur
+   différente. On essaie plusieurs répartitions de mots, de la plus compacte à
+   la plus étalée, et on garde la première qui fait tenir le titre entier.
    ========================================================================== */
+
+const LINE_COMBINATIONS = [
+    [2],
+    [3, 2],
+    [3, 2, 1],
+    [4, 3, 2, 1],
+    [5, 4, 3, 2, 1],
+    [6, 5, 4, 3, 2, 1],
+    [6, 5, 4, 3, 2, 1, 0]
+];
 
 function wrapTextIntoTriangle(container) {
     const span = container.querySelector('span');
     if (!span) return;
 
     const words = span.innerText.split(' ');
-    const triangleHeight = 220;
-    const containerWidth = 254;
-    const lineHeight = 18;
-    const maxLines = Math.floor(triangleHeight * 0.75 / lineHeight);
-    const lineConfigs = [];
+    const maxLines = Math.floor(SLICE_HEIGHT * TEXT_HEIGHT_RATIO / LINE_HEIGHT);
 
+    // Largeur utile de chaque ligne, en pourcentage de la largeur du triangle.
+    const lines = [];
     for (let i = 0; i < maxLines; i++) {
-        const lineBottomY = triangleHeight - i * lineHeight;
-        const usefulWidth = 238 * ((lineBottomY - 12) / 208);
-        const width = Math.max(0, usefulWidth - 16) / containerWidth * 100;
-        lineConfigs.push({ width, words: [] });
+        const bottomY = SLICE_HEIGHT - i * LINE_HEIGHT;
+        const usefulWidth = (SLICE_WIDTH - 2 * CLIP_SIDE) * ((bottomY - CLIP_TOP) / (SLICE_HEIGHT - CLIP_TOP));
+        lines.push({ width: Math.max(0, usefulWidth - TEXT_SIDE_MARGIN) / SLICE_WIDTH * 100, words: [] });
     }
 
-    const combinations = [
-        [2],
-        [3, 2],
-        [3, 2, 1],
-        [4, 3, 2, 1],
-        [5, 4, 3, 2, 1],
-        [6, 5, 4, 3, 2, 1],
-        [6, 5, 4, 3, 2, 1, 0]
-    ];
-
     function tryDistribute(lineIndices) {
-        lineIndices.forEach(i => { if (lineConfigs[i]) lineConfigs[i].words = []; });
+        lineIndices.forEach(i => { if (lines[i]) lines[i].words = []; });
         const remaining = [...words];
 
         for (let i = lineIndices.length - 1; i >= 0; i--) {
-            const line = lineConfigs[lineIndices[i]];
+            const line = lines[lineIndices[i]];
             if (!line) return false;
 
             while (remaining.length) {
                 line.words.unshift(remaining.pop());
-                const text = line.words.join(' ');
-                const estimatedWidth = text.length * 9.1;
-                const maxWidth = line.width / 100 * containerWidth;
+                const estimatedWidth = line.words.join(' ').length * CHAR_WIDTH;
 
-                if (estimatedWidth > maxWidth && line.words.length > 1) {
+                if (estimatedWidth > line.width / 100 * SLICE_WIDTH && line.words.length > 1) {
                     remaining.push(line.words.shift());
                     break;
                 }
             }
         }
+
         return remaining.length === 0;
     }
 
-    let distributed = false;
-    for (const combination of combinations) {
-        if (tryDistribute(combination)) {
-            distributed = true;
-            break;
-        }
+    const fitted = LINE_COMBINATIONS.some(tryDistribute);
+    if (!fitted) {
+        tryDistribute(Array.from({ length: lines.length }, (_, i) => i).reverse());
     }
 
-    if (!distributed) {
-        tryDistribute(Array.from({ length: lineConfigs.length }, (_, i) => i).reverse());
-    }
+    let lastUsed = 0;
+    lines.forEach((line, i) => { if (line.words.length) lastUsed = Math.max(lastUsed, i); });
 
-    let maxVisibleIndex = 0;
-    lineConfigs.forEach((line, i) => {
-        if (line.words.length) maxVisibleIndex = Math.max(maxVisibleIndex, i);
-    });
-
+    // Seules les dimensions calculées ici sont posées en ligne ; le reste vient de .slice span div.
     let html = '';
-    for (let i = maxVisibleIndex; i >= 0; i--) {
-        const line = lineConfigs[i];
-        html += `
-            <div style="
-                display:block;
-                width:${line.width}%;
-                height:${lineHeight}px;
-                margin:0 auto;
-                text-align:center;
-                font-size:11px;
-                font-weight:700;
-                line-height:${lineHeight}px;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow:ellipsis;
-                box-sizing:border-box;
-                transform-origin: center;
-                letter-spacing: 0px;
-                transform: scale(1);
-                transition: letter-spacing 300ms cubic-bezier(0.25, 1, 0.5, 1), transform 300ms cubic-bezier(0.25, 1, 0.5, 1);
-            ">
-                ${line.words.length ? line.words.join(' ') : '&nbsp;'}
-            </div>
-        `;
+    for (let i = lastUsed; i >= 0; i--) {
+        const line = lines[i];
+        html += `<div style="width:${line.width}%; height:${LINE_HEIGHT}px; line-height:${LINE_HEIGHT}px;">${line.words.length ? line.words.join(' ') : '&nbsp;'}</div>`;
     }
 
     span.innerHTML = html;
@@ -626,16 +426,69 @@ function wrapTextIntoTriangle(container) {
 
 
 /* ==========================================================================
-   DOM READY
+   INTERACTIONS
    ========================================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-    if (document.getElementById('wheel')) {
-        initWheel();
+// Vrai si la roue est au moins partiellement à l'écran.
+function isWheelOnScreen() {
+    if (!wheel) return false;
 
-        const descBox = document.querySelector('.description-box');
-        if (descBox) {
-            descBox.addEventListener('click', openCurrentProject);
-        }
-    }
+    const rect = wheel.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+}
+
+function initInteractions() {
+    const descBox = document.querySelector('.description-box');
+    if (descBox) descBox.addEventListener('click', openCurrentProject);
+
+    // Les flèches gauche et droite tournent la roue quand elle est visible, chaque appui
+    // ajoutant un cran. Elles n'ont aucune action par défaut ici, la page ne défilant pas
+    // latéralement. Une touche maintenue ne relance la roue qu'une fois celle-ci arrêtée.
+    document.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return;
+        if (!isWheelOnScreen()) return;
+
+        event.preventDefault();
+        if (event.repeat && motion) return;
+        if (event.key === 'ArrowLeft') rotateLeft();
+        else rotateRight();
+        if (keysHint) keysHint.classList.add('is-used');
+    });
+}
+
+
+/* ==========================================================================
+   DÉMARRAGE
+   ========================================================================== */
+
+function initWheel() {
+    fetch('data/projects.json')
+        .then(res => res.ok ? res.json() : Promise.reject(new Error('projects.json indisponible')))
+        .then(data => {
+            projects = data;
+            totalProjects = data.length;
+            buildWheel();
+        })
+        .catch(err => {
+            console.error('Erreur chargement projets :', err);
+            showWheelError();
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!wheel) return;
+
+    initWheel();
+    initInteractions();
 });
+
+
+/* ==========================================================================
+   API PUBLIQUE
+   ========================================================================== */
+
+window.rotateBy = rotateBy;
+window.rotateLeft = rotateLeft;
+window.rotateRight = rotateRight;
+window.buildWheel = buildWheel;

@@ -1,4 +1,52 @@
 /* ==========================================
+   VARIABLES GLOBALES
+   ========================================== */
+:root {
+    /* Couleur d'accent du site */
+    --accent-rgb: 52, 152, 219;
+    --color-accent: rgb(var(--accent-rgb));
+
+    /* Rouge d'alerte : virus du parcours, bouton Surprise */
+    --alert-rgb: 255, 56, 56;
+    --color-alert: rgb(var(--alert-rgb));
+
+    /* Fond sombre de référence */
+    --deep-rgb: 13, 10, 33;
+    --color-deep: rgb(var(--deep-rgb));
+
+    /* Ambre des easter eggs */
+    --egg-rgb: 240, 183, 86;
+    --color-egg: rgb(var(--egg-rgb));
+
+    /* Vert d'un bloc de parcours décrypté */
+    --decrypted-rgb: 46, 204, 113;
+    --color-decrypted: rgb(var(--decrypted-rgb));
+
+    /* Lueur néon du bouton Surprise au survol */
+    --color-neon: #00ffcc;
+
+    /* Blanc : texte le plus contrasté, reflets, base des surfaces translucides */
+    --white-rgb: 255, 255, 255;
+    --color-white: rgb(var(--white-rgb));
+
+    /* Centre éclairci du dégradé de fond */
+    --color-deep-glow: #1a153a;
+
+    /* Fond du pied de page, plus sombre que le fond de référence */
+    --footer-rgb: 5, 4, 12;
+
+    /* Surfaces translucides : fond de panneau, fond au survol, bordure */
+    --surface: rgba(var(--white-rgb), 0.04);
+    --surface-hover: rgba(var(--white-rgb), 0.08);
+    --border-soft: rgba(var(--white-rgb), 0.08);
+
+    /* Niveaux de texte, du plus lisible au plus discret */
+    --text-main: rgba(var(--white-rgb), 0.75);
+    --text-muted: rgba(var(--white-rgb), 0.55);
+    --text-faint: rgba(var(--white-rgb), 0.35);
+}
+
+/* ==========================================
    STRUCTURE GLOBALE & EFFET PILIER
    ========================================== */
 html {
@@ -8,8 +56,8 @@ html {
 body {
     margin: 0;
     font-family: 'Segoe UI', Arial, sans-serif;
-    background: radial-gradient(circle, #1a153a 0%, #0d0a21 100%);
-    color: #ffffff;
+    background: radial-gradient(circle, var(--color-deep-glow) 0%, var(--color-deep) 100%);
+    color: var(--color-white);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -18,41 +66,7 @@ body {
     overflow-y: auto;
 }
 
-#bg-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.portfolio-band {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 90px; /* Espace généreux entre chaque grande partie */
-    flex-grow: 1; 
-    
-    width: 67%; 
-    max-width: 1200px; /* Sécurité pour que ça ne devienne pas trop géant sur les écrans 4K */
-    padding: 60px 40px 100px 40px;
-    margin-bottom: 0;
-    box-sizing: border-box;
-
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: none; 
-    border-bottom: none; 
-    border-radius: 0; 
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
-}
-
-/* ÉVITE L'ÉCRASEMENT SUR MOBILE : Si l'écran est petit, on repasse à 92% pour garder de la place */
+/* Petits écrans : bande élargie à 92 % */
 @media (max-width: 768px) {
     .portfolio-band {
         width: 92%;
@@ -73,30 +87,28 @@ body {
 
 .section-title {
     font-size: 1.8rem;
-    font-weight: 700;
     margin-top: 0;
     margin-bottom: 30px;
     letter-spacing: 0.5px;
     text-align: center;
     text-transform: uppercase;
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    text-shadow: 0 0 10px rgba(var(--white-rgb), 0.2);
 }
 
-/* MODIFIÉ : Les cartes s'élargissent harmonieusement jusqu'à 800px maximum */
+/* Les cartes s'élargissent jusqu'à 800px maximum */
 .standard-card, .placeholder-card {
     width: 100%;
     max-width: 800px;
     padding: 24px;
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
     border-radius: 14px;
-    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.01);
+    box-shadow: inset 0 0 15px rgba(var(--white-rgb), 0.01);
 }
 
 .placeholder-card p {
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-main);
     line-height: 1.6;
     margin: 0;
     font-size: 15px;
@@ -108,10 +120,10 @@ body {
    ========================================== */
 .global-header {
     width: 100%;
-    background: rgba(13, 10, 33, 0.7);
+    background: rgba(var(--deep-rgb), 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-soft);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -120,7 +132,6 @@ body {
 }
 
 .nav-container {
-    width: 100%;
     max-width: 1400px;
     margin: 0 auto;
     display: flex;
@@ -129,7 +140,7 @@ body {
 }
 
 .home-btn {
-    color: #ffffff;
+    color: var(--color-white);
     text-decoration: none;
     font-weight: 700;
     font-size: 14px;
@@ -137,12 +148,12 @@ body {
     text-transform: uppercase;
     padding: 8px 16px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
     transition: background 0.2s, transform 0.1s;
 }
 
-.home-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.home-btn:hover { background: var(--surface-hover); }
 
 .categories-nav {
     display: flex;
@@ -152,7 +163,7 @@ body {
 }
 
 .category-btn {
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--text-muted);
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
@@ -162,12 +173,23 @@ body {
     white-space: nowrap;
 }
 
-.category-btn:hover { color: #ffffff; }
+.category-btn:hover { color: var(--color-white); }
+
+/* Bouton de navigation utilisé comme lien autonome dans le flux du texte */
+.btn-inline {
+    display: inline-block;
+    text-decoration: none;
+}
+
+/* Rangée de boutons détachée du contenu qui la précède */
+.btn-row {
+    margin-top: 30px;
+}
 
 .category-btn.active {
-    color: #ffffff;
-    background: rgba(52, 152, 219, 0.15);
-    border: 1px solid rgba(52, 152, 219, 0.3);
+    color: var(--color-white);
+    background: rgba(var(--accent-rgb), 0.15);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
 }
 
 /* TITRE DE PRÉSENTATION */
@@ -179,7 +201,7 @@ body {
 
 .main-title-area h1 {
     font-size: 3.5rem; 
-    font-weight: 900;  /* Plus épais (800 à 900) */
+    font-weight: 900;
     letter-spacing: 1px;
     margin: 0;
     text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
@@ -187,17 +209,14 @@ body {
 }
 
 .profile-subtitle {
-    margin: 10px 0 0 0; /* Un peu plus d'espace sous le gros titre */
-    color: #3498db;
+    margin: 10px 0 0 0;
+    color: var(--color-accent);
     font-weight: 600;
-    font-size: 1.1rem; /* Légèrement plus grand pour équilibrer avec le titre */
+    font-size: 1.1rem;
     letter-spacing: 2px;
     text-transform: uppercase;
 }
 
-/* ==========================================
-   PARCOURS V2 : BANDEAUX INTERACTIFS INFINIS
-   ========================================== */
 /* ==========================================
    OPTIMISATIONS DES COUCHES GRAPHIQUES (GPU)
    ========================================== */
@@ -222,10 +241,10 @@ body {
     max-width: 1200px;
     padding: 60px 40px 100px 40px;
     box-sizing: border-box;
-    background: rgba(13, 10, 33, 0.35); /* Légèrement plus sombre pour un meilleur contraste */
+    background: rgba(var(--deep-rgb), 0.35);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-soft);
     border-top: none; 
     border-bottom: none; 
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
@@ -235,18 +254,61 @@ body {
     transition: background-color 0.2s ease;
 }
 
-/* ⚡ LA PROTECTION ANTI-LAG : Quand ça bouge, on stoppe le calcul du flou arrière */
-.portfolio-band.is-animating,
-.portfolio-band.is-animating .timeline-header-band,
-.portfolio-band.is-animating .timeline-header-band::before {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(18, 14, 43, 0.94) !important; 
+
+/* Mise en page de la page CV : bande centrée verticalement autour du PDF */
+.cv-viewer {
+    min-height: 85vh;
+    justify-content: center;
+    padding-top: 100px;
+    padding-bottom: 40px;
 }
 
+/* Colonne qui contient le cadre du CV et son bouton de téléchargement */
+.cv-frame-wrap {
+    max-width: 850px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Cadre blanc affichant le PDF, au format A4 */
+.cv-frame {
+    width: 100%;
+    aspect-ratio: 1 / 1.414;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+    margin-bottom: 25px;
+    background: var(--color-white);
+}
+
+/* Icône tirée d'un fichier SVG utilisé comme masque : elle prend la couleur du texte */
+.icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    background-color: currentColor;
+    -webkit-mask: no-repeat center / contain;
+    mask: no-repeat center / contain;
+}
+.icon-download {
+    -webkit-mask-image: url('data/images/download.svg');
+    mask-image: url('data/images/download.svg');
+}
+
+/* Ligne de repli sous le cadre, pour les navigateurs qui n'affichent pas les PDF */
+.cv-frame-fallback {
+    margin-top: 18px;
+    margin-bottom: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.cv-frame-fallback a {
+    color: var(--color-accent);
+}
 
 /* ==========================================
-   PARCOURS V2 : STRUCTURE DE L'ACCORDÉON
+   PARCOURS : STRUCTURE DE L'ACCORDÉON
    ========================================== */
 .custom-timeline {
     width: 100%;
@@ -257,7 +319,6 @@ body {
 }
 
 .timeline-row {
-    width: 100%;
     display: flex;
     position: relative;
 }
@@ -268,26 +329,27 @@ body {
     width: 88%;
     display: flex;
     flex-direction: column;
+    position: relative;
+    cursor: pointer; /* Le curseur "main" s'affiche sur tout le rectangle violet */
 }
 
 /* LE BANDEAU DE TITRE */
 .timeline-header-band {
     padding: 22px;
     box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: relative;
     z-index: 6;
-    cursor: pointer;
     transform: translateZ(0);
     transition: background-color 0.2s ease;
 }
-.timeline-header-band:hover { background: rgba(255, 255, 255, 0.06); }
+.timeline-header-band:hover { background: var(--surface-hover); }
 
 /* EXTENSION GAUCHE */
 .timeline-row.left .timeline-header-band {
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-soft);
     border-left: none;
     border-radius: 0 16px 16px 0;
 }
@@ -295,19 +357,19 @@ body {
     content: '';
     position: absolute;
     top: -1px; bottom: -1px; right: 100%; width: 100vw;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
     pointer-events: none;
     transition: background-color 0.2s ease;
 }
-.timeline-row.left .timeline-header-band:hover::before { background: rgba(255, 255, 255, 0.06); }
+.timeline-row.left .timeline-header-band:hover::before { background: var(--surface-hover); }
 
 /* EXTENSION DROITE */
 .timeline-row.right .timeline-header-band {
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-soft);
     border-right: none;
     border-radius: 16px 0 0 16px;
 }
@@ -315,15 +377,21 @@ body {
     content: '';
     position: absolute;
     top: -1px; bottom: -1px; left: 100%; width: 100vw;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
     pointer-events: none;
     transition: background-color 0.2s ease;
 }
-.timeline-row.right .timeline-header-band:hover::before { background: rgba(255, 255, 255, 0.06); }
+.timeline-row.right .timeline-header-band:hover::before { background: var(--surface-hover); }
+
+/* Message de chargement ou d'échec affiché à la place de la frise */
+.timeline-status {
+    text-align: center;
+    color: var(--text-muted);
+}
 
 /* TYPOGRAPHIES ET FLÈCHE */
 .timeline-meta {
@@ -332,52 +400,74 @@ body {
     align-items: center;
     margin-bottom: 8px;
 }
-.timeline-header-band h3 { margin: 5px 0; font-size: 1.15rem; font-weight: 700; color: #ffffff; }
-.timeline-institution { display: block; font-size: 13.5px; color: #3498db; font-weight: 600; font-style: italic; }
+.timeline-header-band h3 { margin: 5px 0; font-size: 1.15rem; }
+.timeline-institution { display: block; font-size: 13.5px; color: var(--color-accent); font-weight: 600; font-style: italic; }
+
+/* BADGES DE CATÉGORIE ET DATE (générés depuis resume.json) */
+.timeline-badge-school,
+.timeline-badge-internship {
+    padding: 3px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+.timeline-badge-school {
+    color: var(--color-accent);
+    background: rgba(var(--accent-rgb), 0.15);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
+}
+
+.timeline-badge-internship {
+    color: var(--color-egg);
+    background: rgba(var(--egg-rgb), 0.15);
+    border: 1px solid rgba(var(--egg-rgb), 0.3);
+}
+
+.timeline-date {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
 
 .toggle-arrow {
     position: absolute; right: 22px; top: calc(50% - 10px); font-size: 12px;
-    color: rgba(255, 255, 255, 0.4); transition: transform 0.3s ease, color 0.2s;
+    color: var(--text-faint); transition: transform 0.3s ease, color 0.2s;
 }
-.timeline-header-band:hover .toggle-arrow { color: #ffffff; }
-.timeline-item-container.open .toggle-arrow { transform: rotate(180deg); color: #3498db; }
+.timeline-header-band:hover .toggle-arrow { color: var(--color-white); }
+.timeline-item-container.open .toggle-arrow { transform: rotate(180deg); color: var(--color-accent); }
 
 /* ==========================================================================
-   🚀 STRUCTURE FIXE ET POLICE IDENTIQUE (ZÉRO ADAPTATION DE TAILLE)
+   CONTENU DÉPLIÉ DU PARCOURS
    ========================================================================== */
-.timeline-content {
-    display: block; 
-}
-
+/* Pas de position ni de z-index ici : le texte doit rester SOUS la hitbox ::before
+   du conteneur, pour que tout le bandeau ouvert reste une seule zone cliquable */
 .timeline-content-inner {
     padding: 20px 10px 10px 10px;
 }
 
-/* 🔴 ÉTAT FERMÉ : Même police, seule la couleur et l'ombre changent */
+/* État fermé : texte brouillé en rouge. Seules la couleur et l'ombre diffèrent de l'état ouvert */
 .timeline-item-container .timeline-content p {
-    color: #ff3838; /* Rouge alerte */
-    font-family: inherit; /* 👈 Reprend STRICTEMENT ta police d'origine */
-    font-size: 14px;      /* 👈 Même taille */
-    line-height: 1.6;     /* 👈 Même hauteur de ligne */
-    letter-spacing: normal;
-    word-break: normal;
+    color: var(--color-alert);
+    font-size: 14px;
+    line-height: 1.6;
     margin: 0 0 12px 0;
-    text-shadow: 0 0 6px rgba(255, 56, 56, 0.3);
+    text-shadow: 0 0 6px rgba(var(--alert-rgb), 0.3);
     transition: color 0.4s ease, text-shadow 0.4s ease;
 }
 .timeline-item-container .timeline-content p:last-child {
     margin-bottom: 0;
 }
 
-/* 🟢 ÉTAT OUVERT : Passage au vert hacker */
+/* État ouvert : texte décrypté en vert */
 .timeline-item-container.open .timeline-content p {
-    color: #2ecc71; /* Vert émeraude */
-    text-shadow: 0 0 6px rgba(46, 204, 113, 0.25);
+    color: var(--color-decrypted);
+    text-shadow: 0 0 6px rgba(var(--decrypted-rgb), 0.25);
 }
 
 
 /* ==========================================
-   MODIFIÉ : PARTIE COMPÉTENCES AUTOMATISÉE (GRILLE)
+   PARTIE COMPÉTENCES (GRILLE)
    ========================================== */
 .skills-grid {
     display: grid;
@@ -391,14 +481,14 @@ body {
     margin-top: 0;
     margin-bottom: 12px;
     font-size: 16px;
-    color: #3498db;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--color-accent);
+    border-bottom: 1px solid var(--border-soft);
     padding-bottom: 8px;
 }
 .skills-category ul {
     margin: 0;
     padding-left: 20px;
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--text-main);
     font-size: 14.5px;
     line-height: 1.7;
 }
@@ -419,7 +509,6 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .slice {
@@ -431,11 +520,11 @@ body {
     margin-left: -127px; 
     transform-origin: top center; 
     clip-path: polygon(50% 12px, calc(100% - 8px) 100%, 8px 100%);
-    transform: rotate(var(--initial-angle));
-    transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), filter 0.25s ease, opacity 0.3s;
-    opacity: 0;
-    pointer-events: none;
-    filter: brightness(0.5); 
+    /* Éclaircissement au survol et en bas ; la rotation est animée par wheel.js */
+    filter: brightness(0.5);
+    transition: filter 0.25s ease;
+    z-index: 2;
+    cursor: pointer;
     box-sizing: border-box;
     overflow: hidden; 
 
@@ -444,9 +533,6 @@ body {
     flex-direction: column;
     justify-content: flex-end; 
     align-items: center;
-    padding-bottom: 0px; 
-    padding-left: 0px;
-    padding-right: 0px;
 }
 
 .slice span {
@@ -457,59 +543,93 @@ body {
     width: 100%;
     height: 100%;             /* Occupe toute la hauteur pour que le repère soit identique au parent */
     pointer-events: none;
+    /* Calque permanent : sans lui, le texte n'est confié à la carte graphique que
+       pendant les effets de survol (reflet, éclaircissement), et change d'aspect
+       à leur fin. */
+    transform: translateZ(0);
 }
 
-/* Ces blocs DIV sont ceux générés par ton JavaScript */
+/* Lignes de texte générées par wheel.js dans chaque triangle. Largeur, hauteur et
+   interligne, calculés, sont posés en ligne. */
 .slice span div {
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
     font-size: 11px;      /* Taille petite pour éviter les débordements */
-    line-height: 1.1;
     font-weight: 700;
-    color: white;
     text-transform: uppercase;
     text-align: center;
-    word-break: break-word;
-    margin-bottom: 2px;
-    
-    /* La contrainte de largeur est maintenant gérée par le JS via 'width: X%' */
-    /* On force une largeur max globale pour être sûr */
-    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0;
+    /* Même courbe que EASING dans wheel.js */
+    transition: letter-spacing 300ms cubic-bezier(0.25, 1, 0.5, 1), font-size 300ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Éléments pour forcer la forme de triangle du texte */
-.shape-left, .shape-right {
-    width: 50%;
-    height: 100%;
-    pointer-events: none;
+/* Survol (classe posée par wheel.js) : lettres écartées, compensées par une police
+   réduite de 8 % (11px × 0.92 ; espacement 2px × 0.92). Une réduction par
+   transform: scale serait dessinée par la carte graphique pendant l'animation puis
+   redessinée à la fin : le texte se recalerait. */
+.slice.is-hovered span div {
+    letter-spacing: 1.84px;
+    font-size: 10.12px;
 }
-.shape-left { float: left; shape-outside: polygon(0 0, 100% 0, 0 100%); }
-.shape-right { float: right; shape-outside: polygon(100% 0, 0 100%, 100% 100%); }
+
 .slice::before {
     content: '';
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
+    background: linear-gradient(135deg, transparent 30%, rgba(var(--white-rgb), 0.25) 50%, transparent 70%);
     transform: translateX(-110%);
     z-index: 1; pointer-events: none;
 }
-.slice.visible { opacity: 1; pointer-events: auto; cursor: pointer; }
-.slice.visible:hover { filter: brightness(1); }
-.slice.visible:hover::before { transform: translateX(110%); transition: transform 0.55s; }
-.slice.visible:hover span div {
-    letter-spacing: 2px; /* Applique l'agrandissement directement sur les lignes calculées */
-}
-.slice.visible:hover span {
-    letter-spacing: normal; 
-}
-.slice.active { transform: rotate(var(--initial-angle)) scale(1.16); z-index: 5; filter: brightness(1); }
+.slice:hover { filter: brightness(1); }
+.slice:hover::before { transform: translateX(110%); transition: transform 0.55s; }
+/* Le transform du triangle actif est posé en ligne par wheel.js */
+.slice.active { z-index: 5; filter: brightness(1); }
 
 .base-triangle {
     position: absolute;
     top: 0; left: 50%; width: 254px; height: 220px; margin-left: -127px; 
-    background: #0d0a21; clip-path: polygon(8px 0px, calc(100% - 8px) 0px, 50% 100%); 
+    background: var(--color-deep); clip-path: polygon(8px 0px, calc(100% - 8px) 0px, 50% 100%); 
     z-index: 10; pointer-events: none;
-    display: flex; justify-content: center; align-items: flex-start; padding-top: 35px; box-sizing: border-box;
+    display: flex; flex-direction: column; align-items: center; padding-top: 35px; box-sizing: border-box;
 }
-.base-triangle span { color: #ffffff; font-size: 15px; font-weight: 600; text-transform: uppercase; }
+.base-triangle span { font-size: 15px; font-weight: 600; text-transform: uppercase; }
+
+/* Sous le titre : position du projet courant (3/12), entre deux touches ← → qui
+   signalent le clavier. wheel.js les efface en fondu à la première rotation au
+   clavier (is-used) ; elles reviennent à chaque chargement de la page. */
+.wheel-keys {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+.base-triangle .key-hint {
+    padding: 0 4px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    color: var(--text-faint);
+    font-size: 11px;
+    line-height: 14px;
+    transition: opacity 0.6s ease;
+    animation: key-blink 10s 2s infinite;
+}
+/* Toutes les 10 s, la touche gauche puis la droite s'allument et s'éteignent en 0,5 s */
+.base-triangle .key-hint:last-child { animation-delay: 2.5s; }
+@keyframes key-blink {
+    0% { color: var(--color-accent); }
+    5%, 100% { color: var(--text-faint); }
+}
+.wheel-keys.is-used .key-hint { opacity: 0; animation: none; }
+.wheel-keys[hidden] { display: none; }
+.base-triangle .project-counter {
+    color: var(--text-muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+}
 
 .description-box {
     width: 100%; 
@@ -519,8 +639,8 @@ body {
     text-align: center; 
     box-sizing: border-box; 
     z-index: 5;
-    background: rgba(255, 255, 255, 0.04); 
-    border: 1px solid rgba(255, 255, 255, 0.1); 
+    background: var(--surface); 
+    border: 1px solid var(--border-soft); 
     border-radius: 16px;
     margin-top: 60px; 
     cursor: pointer;  
@@ -528,41 +648,24 @@ body {
 }
 
 .description-box:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-hover);
     transform: translateY(-2px);
 }
 
-.description-box h2 { margin-top: 0; margin-bottom: 10px; color: #ffffff; font-size: 22px; }
-.description-box p { color: rgba(255, 255, 255, 0.75); margin: 0; font-size: 14.5px; line-height: 1.6; }
-.description-box a { color: #3498db; text-decoration: none; border-bottom: 1px dashed #3498db; }
+.description-box h2 { margin-top: 0; margin-bottom: 10px; font-size: 22px; }
+.description-box p { color: var(--text-main); margin: 0; font-size: 14.5px; line-height: 1.6; }
+.description-box a { color: var(--color-accent); text-decoration: none; border-bottom: 1px dashed var(--color-accent); }
 
 /* ==========================================================================
-   GESTION DES TRANSITIONS / HOVER DE LA ROUE ET TEXTES
+   ENCART DE TEXTE SOUS LA ROUE
    ========================================================================== */
 
-#wheel.is-rotating {
-    pointer-events: none !important;
-}
-
-#wheel.suppress-hover .slice:hover {
-    filter: brightness(0.5) !important;
-}
-
-#wheel.suppress-hover .slice:hover::before {
-    transform: translateX(-110%) !important;
-    transition: none !important;
-}
-
-#wheel.suppress-hover .slice:hover span div {
-    letter-spacing: normal !important;
-}
-
-#wheel.no-transition,
-#wheel.no-transition *,
-#wheel.no-transition *::before,
-#wheel.no-transition *::after {
-    transition: none !important;
-    animation: none !important;
+/* Sous-titre et date du projet affiché sous la roue */
+#project-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.75;
+    margin: -5px 0 15px 0;
+    font-weight: 500;
 }
 
 /* Optimisation matérielle (GPU) pour l'encart texte sous la roue */
@@ -571,15 +674,8 @@ body {
 #project-desc {
     will-change: transform;
     backface-visibility: hidden;
-    transform-origin: center center;
     display: inline-block;
     width: 100%;
-}
-
-/* L'animation ne se déclenche que si la classe .is-hovered est présente en JS */
-.slice.is-hovered::after,
-.slice.is-hovered .shine {
-    animation: votre-animation-de-lumiere 0.5s ease; /* Remplacez par votre animation existante */
 }
 
 /* ==========================================
@@ -587,13 +683,13 @@ body {
    ========================================== */
 .main-footer {
     width: 100%; 
-    background: rgba(5, 4, 12, 0.85); 
+    background: rgba(var(--footer-rgb), 0.85); 
     backdrop-filter: blur(10px); 
     padding: 30px 20px;
     text-align: center; 
     box-sizing: border-box; 
     margin-top: auto; 
-    border-top: 1px solid rgba(255, 255, 255, 0.1); 
+    border-top: 1px solid var(--border-soft); 
 }
 .footer-links { 
     display: flex; 
@@ -602,118 +698,101 @@ body {
     margin-bottom: 12px; 
 }
 .footer-links a { 
-    color: rgba(255, 255, 255, 0.6); 
+    color: var(--text-muted); 
     text-decoration: none; 
     font-weight: 600; 
     font-size: 15px; 
 }
 .footer-links a:hover { 
-    color: #ffffff; 
+    color: var(--color-white); 
 }
 .copyright { 
     margin: 0; 
     font-size: 12px; 
-    color: rgba(255, 255, 255, 0.3); 
+    color: var(--text-faint); 
 }
 
 /* ==========================================================================
-   👾 LE PETIT VIRUS (SPACE INVADER) - ANGLE ALÉATOIRE DISCRET
+   LE PETIT VIRUS (SPACE INVADER) DU PARCOURS
    ========================================================================== */
-.timeline-item-container {
-    position: relative; 
-    cursor: pointer; /* Le curseur "main" s'affiche sur tout le rectangle violet */
-}
 
-/* 🎯 LA HITBOX (Pour les blocs situés à DROITE de la frise) 
-   Le Space Invader est à gauche, donc on étend le clic vers la DROITE (vers le bord de l'écran) */
+/* Zone de clic des blocs de droite, étendue vers le bord droit de l'écran (le virus est à gauche) */
 .timeline-row.right .timeline-item-container::before {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
-    right: -35%; /* 🚀 S'étire vers la droite (le bord extérieur de l'écran) */
+    right: -35%;
     z-index: 1;
-    cursor: pointer;
 }
 
-/* 🎯 LA HITBOX (Pour les blocs situés à GAUCHE de la frise) 
-   Le Space Invader est à droite, donc on étend le clic vers la GAUCHE (vers le bord de l'écran) */
+/* Zone de clic des blocs de gauche, étendue vers le bord gauche de l'écran (le virus est à droite) */
 .timeline-row.left .timeline-item-container::before {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     right: 0;
-    left: -35%; /* 🚀 S'étire vers la gauche (le bord extérieur de l'écran) */
+    left: -35%;
     z-index: 1;
-    cursor: pointer;
-}
-
-/* ⚠️ IMPORTANT : On force le contenu textuel et les titres à passer AU-DESSUS 
-   de la hitbox pour rester sélectionnables et cliquables normalement */
-.timeline-header-band,
-.timeline-content-body {
-    position: relative;
-    z-index: 2;
 }
 
 .timeline-virus {
     position: absolute;
     top: 26px;          
     width: 12%;          
-    height: auto;
-    fill: #ff3838;      
+    fill: var(--color-alert);      
     z-index: 10; /* Le virus reste au tout premier plan visuel */       
     shape-rendering: crispEdges; 
     
-    /* 🔄 BRANCHEMENT JAVASCRIPT : Applique l'angle dynamique (0deg par défaut au chargement) */
+    /* Angle tiré au hasard par resume.js, 0deg par défaut */
     transform: rotate(var(--virus-angle, 0deg));
-    transform-origin: center;
 
-    /* ⚠️ CRUCIAL : On n'anime QUE l'opacity pour conserver le rendu "saccadé / image par image" */
+    /* Seule l'opacité est animée : la rotation reste saccadée, image par image */
     transition: opacity 0.375s ease-in-out;
-    opacity: 1;
-
-    pointer-events: auto; 
 }
 
-/* 👈 POSITIONNEMENT GAUCHE CENTRÉ */
+/* Positionnement à gauche du bandeau */
 .timeline-virus.virus-left {
     left: -22%;        
-    right: auto;
 }
 
-/* 👉 POSITIONNEMENT DROITE CENTRÉ */
+/* Positionnement à droite du bandeau */
 .timeline-virus.virus-right {
     right: -22%;       
-    left: auto;
 }
 
-/* 🟢 QUAND LE RECTANGLE EST OUVERT : Disparition fluide globale */
+/* Bloc ouvert : le virus disparaît en fondu */
 .timeline-item-container.open > .timeline-virus {
     opacity: 0;
-    /* On force une remise à zéro de la rotation et un scale plus petit pendant le fondu sortant */
+    /* Rotation remise à zéro et légère réduction pendant le fondu */
     transform: scale(0.7) rotate(0deg); 
     transition: opacity 0.375s ease-in-out, transform 0.375s ease-in-out;
     
-    /* Sécurité : Une fois masqué, on désactive les clics sur le virus */
+    /* Virus masqué : plus cliquable */
     pointer-events: none; 
 }
 
 /* ==========================================================================
-   🎁 EASTER EGG - BOUTON SURPRISE
+   MESSAGES D'ERREUR
    ========================================================================== */
+/* Préfixé pour l'emporter sur la couleur des paragraphes de carte */
+.portfolio-band .error-message {
+    color: var(--color-alert);
+}
+
+/* ==========================================================================
+   EASTER EGG : BOUTON SURPRISE
+   ========================================================================== */
+/* Même apparence que les autres liens du pied de page : seul le survol le trahit */
 .btn-surprise {
     position: relative;
-    color: #ff3838; /* Couleur rouge virus/space invader pour attirer discrètement l'œil */
-    font-weight: bold;
     transition: all 0.3s ease;
 }
 
-/* Effet au survol du bouton */
+/* Au survol : lueur néon et léger zoom */
 .btn-surprise:hover {
-    color: #00ffcc; /* Devient néon/cyberpunk au survol */
-    text-shadow: 0 0 8px #00ffcc;
+    text-shadow: 0 0 8px var(--color-neon);
     transform: scale(1.05);
 }

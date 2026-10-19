@@ -1,18 +1,18 @@
 /* ==========================================================================
-   PROJECTS.JS - LOGIQUE DÉTAIL PROJET (AVEC SOUS-TITRE, DATE & LONG_DESC)
+   PROJECTS.JS - PAGE DE DÉTAIL D'UN PROJET
    ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Sécurité : On vérifie si on est bien sur la page de détail
+    // N'agit que sur la page de détail d'un projet
     const titleContainer = document.getElementById('dynamic-project-title');
     if (!titleContainer) return; 
 
-    // 1. On récupère l'identifiant du projet dans l'URL
+    // 1. Identifiant du projet lu dans l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('id');
 
     if (!projectId) {
-        afficherErreur("Aucun projet spécifié.");
+        showError("Aucun projet spécifié.");
         return;
     }
 
@@ -23,56 +23,56 @@ document.addEventListener("DOMContentLoaded", () => {
             return response.json();
         })
         .then(projects => {
-            const projetActif = projects.find(p => {
+            const activeProject = projects.find(p => {
+                // Même transformation que dans wheel.js, accents compris
                 const slug = p.title
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
                     .toLowerCase()
                     .trim()
-                    .replace(/[\s\-]+/g, '_')  
-                    .replace(/[^a-z0-9_]/g, '');
+                    .replace(/['\u2019\s\-]+/g, '_')
+                    .replace(/[^a-z0-9_]/g, '')
+                    .replace(/_+/g, '_')
+                    .replace(/^_|_$/g, '');
                 return slug === projectId;
             });
 
-            if (projetActif) {
+            if (activeProject) {
                 // 3. Injection des données principales
-                document.title = `${projetActif.title} - Perottino Tony`;
-                titleContainer.textContent = projetActif.title;
+                document.title = `${activeProject.title} - Perottino Tony`;
+                titleContainer.textContent = activeProject.title;
 
-                // --- ADAPTATION : GESTION DU SOUS-TITRE ET DE LA DATE ---
                 const subtitleElement = document.getElementById('dynamic-project-subtitle');
-                if (projetActif.subtitle && projetActif.date) {
-                    // Si le sous-titre ET la date existent, on les sépare par un tiret
-                    subtitleElement.textContent = `${projetActif.subtitle} - ${projetActif.date}`;
+                if (activeProject.subtitle && activeProject.date) {
+                    subtitleElement.textContent = `${activeProject.subtitle} - ${activeProject.date}`;
                 } else {
-                    // Repli de sécurité si l'un des deux est manquant dans le JSON
-                    subtitleElement.textContent = projetActif.subtitle || projetActif.date || "Spécification technique";
+                    // Repli si l'un des deux manque dans le JSON
+                    subtitleElement.textContent = activeProject.subtitle || activeProject.date || "Spécification technique";
                 }
 
-                // --- ADAPTATION : CORRECTION DU CHEMIN DE DESCRIPTION (long_desc) ---
                 const descElement = document.getElementById('dynamic-project-desc');
-                descElement.innerHTML = projetActif.long_desc || projetActif.short_desc || "Aucune description disponible.";
+                descElement.innerHTML = activeProject.long_desc || activeProject.short_desc || "Aucune description disponible.";
 
                 // 4. Couleur des billes/particules en arrière-plan
-                if (window.changeBackgroundParticlesColor && projetActif.color) {
-                    setTimeout(() => {
-                        window.changeBackgroundParticlesColor(projetActif.color);
-                    }, 50);
+                if (window.changeBackgroundParticlesColor && activeProject.color) {
+                    window.changeBackgroundParticlesColor(activeProject.color);
                 }
             } else {
-                afficherErreur("Projet introuvable dans la base de données.");
+                showError("Projet introuvable dans la base de données.");
             }
         })
         .catch(error => {
             console.error(error);
-            afficherErreur("Échec de la synchronisation avec le protocole Projets.");
+            showError("Échec de la synchronisation avec le protocole Projets.");
         });
 });
 
-function afficherErreur(message) {
+function showError(message) {
     const title = document.getElementById('dynamic-project-title');
-    const sub = document.getElementById('dynamic-project-subtitle');
+    const subtitle = document.getElementById('dynamic-project-subtitle');
     const desc = document.getElementById('dynamic-project-desc');
     
     if (title) title.textContent = "[ERREUR 404]";
-    if (sub) sub.textContent = "Accès refusé ou ressource inexistante";
-    if (desc) desc.innerHTML = `<p style="color: #ff4a4a;">${message}</p>`;
+    if (subtitle) subtitle.textContent = "Accès refusé ou ressource inexistante";
+    if (desc) desc.innerHTML = `<p class="error-message">${message}</p>`;
 }
