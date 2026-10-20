@@ -589,6 +589,48 @@ body {
 /* Le transform du triangle actif est posé en ligne par wheel.js */
 .slice.active { z-index: 5; filter: brightness(1); }
 
+/* Easter egg de la roue brisée (wheel.js). Roue forcée : lueur rouge derrière la roue,
+   qui s'intensifie et s'étend avec --heat (0 à 1, réglé par wheel.js) ; le tremblement
+   est animé par wheel.js. Placée sous le contenu (z-index négatif) : elle teinte le fond
+   autour de la roue sans passer sur l'encart de description. */
+.wheel-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -180px;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--alert-rgb), 0.85) 0%, rgba(var(--alert-rgb), 0.45) 35%, rgba(var(--alert-rgb), 0.12) 55%, transparent 70%);
+    /* Nette dès le premier stade, puis s'étend ; transition d'une seconde, la durée
+       d'un stade : la lueur grandit en continu. */
+    opacity: min(1, calc(2 * var(--heat, 0)));
+    transform: scale(calc(0.45 + 0.75 * var(--heat, 0)));
+    transition: opacity 1s linear, transform 1s linear;
+    pointer-events: none;
+}
+
+/* Casse : éclats des triangles, éclair et onde de choc partant du centre de la roue.
+   Le texte d'un éclat n'a pas besoin du calque permanent de .slice span : un calque
+   par éclat, découpé, coûterait cher à la carte graphique. */
+.wheel-shard { pointer-events: none; }
+.wheel-shard span { transform: none; }
+.wheel-flash, .wheel-shockwave {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 200px; height: 200px;
+    margin: -100px 0 0 -100px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 20;
+}
+.wheel-flash {
+    background: radial-gradient(circle, rgba(var(--white-rgb), 0.95) 0%, rgba(var(--alert-rgb), 0.6) 35%, transparent 70%);
+}
+.wheel-shockwave { border: 3px solid rgba(var(--alert-rgb), 0.8); box-sizing: border-box; }
+
+/* Roue brisée : l'encart n'ouvre plus rien et affiche l'alerte */
+.project-wheel-box.is-broken .description-box { cursor: default; transform: none; background: var(--surface); }
+.project-wheel-box.is-broken #project-title { color: var(--color-alert); }
+
 .base-triangle {
     position: absolute;
     top: 0; left: 50%; width: 254px; height: 220px; margin-left: -127px; 
