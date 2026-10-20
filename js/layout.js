@@ -17,7 +17,7 @@ const FOOTER_ITEMS = [
     { href: 'https://github.com/KibyPoyo', label: 'GitHub', newTab: true },
     { href: 'https://www.linkedin.com/in/tony-perottino-812a22325/', label: 'LinkedIn', newTab: true },
     { href: 'cv.html', label: 'CV' },
-    { href: 'piscine_a_balles.html', label: 'Surprise', cssClass: 'btn-surprise' }
+    { href: 'ball_pit.html', label: 'Surprise', cssClass: 'btn-surprise' }
 ];
 
 // Ancre portant la classe active selon la valeur de data-page sur le body.

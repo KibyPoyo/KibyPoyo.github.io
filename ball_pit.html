@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page easter egg : on demande aux moteurs de recherche de ne pas la référencer -->
+    <meta name="robots" content="noindex">
+
+    <title>Piscine à balles</title>
+
+    <link rel="icon" href="favicon.ico" sizes="32x32">
+    <link rel="icon" href="data/images/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data/images/favicon-180.png">
+
+    <style>
+        /* Palette propre à la piscine, indépendante de style.css */
+        :root {
+            --color-accent: #3498db;
+            --pit-red: #ff3838;
+            --pit-red-soft: rgba(255, 56, 56, 0.2);
+            --pit-dark: #0a0c12;
+            --pit-text: #ffffff;
+        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--pit-dark); overflow: hidden; }
+        #bg-canvas { display: block; }
+
+        .back-button { position: fixed; top: 20px; left: 20px; padding: 10px 20px; background: var(--pit-red-soft); color: var(--pit-red); border: 1px solid var(--pit-red); border-radius: 5px; text-decoration: none; font-family: sans-serif; z-index: 100; }
+
+        /* Menu des commandes : discret tant que la souris ne le survole pas */
+        .control-panel {
+            position: fixed; bottom: 20px; left: 20px; z-index: 100;
+            display: flex; flex-direction: column; gap: 8px; padding: 12px;
+            background: rgba(10, 12, 18, 0.85); border: 1px solid var(--pit-red); border-radius: 8px;
+            font-family: sans-serif; font-size: 13px; color: var(--pit-red);
+            opacity: 0.3; transition: opacity 0.25s ease;
+        }
+        .control-panel:hover, .control-panel:focus-within { opacity: 1; }
+
+        /* États du menu (touche H, attribut data-menu du body) : discret par défaut,
+           affiché, masqué. Masqué, seul reste en bas à gauche le rappel de la touche H. */
+        body[data-menu="shown"] .control-panel { opacity: 1; }
+        body[data-menu="hidden"] .control-panel { display: none; }
+        .menu-hint { display: none; position: fixed; bottom: 20px; left: 20px; z-index: 100; color: var(--pit-red); font-family: sans-serif; opacity: 0.3; pointer-events: none; }
+        .menu-hint kbd { font-size: 16px; padding: 4px 10px; }
+        body[data-menu="hidden"] .menu-hint { display: block; }
+        .control-row { display: flex; gap: 8px; align-items: center; }
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        input { width: 50px; padding: 8px; background: var(--pit-dark); border: 1px solid var(--pit-red); color: var(--pit-text); border-radius: 4px; text-align: center; }
+        button { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--pit-dark); color: var(--pit-red); border: 1px solid var(--pit-red); padding: 8px 12px; cursor: pointer; border-radius: 4px; font: inherit; }
+        button:hover { background: var(--pit-red); color: var(--pit-text); }
+        .range-value { min-width: 3.5em; color: var(--pit-text); }
+        button.is-on { background: var(--pit-red-soft); }
+
+        /* Touche du clavier associée à une commande */
+        kbd { padding: 1px 5px; border: 1px solid currentColor; border-radius: 3px; font-family: inherit; font-size: 11px; opacity: 0.8; }
+
+        /* Icône de portée de la souris, en masque pour prendre la couleur du texte */
+        .icon-range {
+            width: 16px; height: 16px; flex-shrink: 0; background-color: currentColor;
+            -webkit-mask: url(data/images/range.svg) center / contain no-repeat;
+            mask: url(data/images/range.svg) center / contain no-repeat;
+        }
+    </style>
+</head>
+<body data-page="ball-pit" data-menu="discreet">
+
+    <a href="index.html" class="back-button">← Retour</a>
+
+    <div class="control-panel" id="control-panel">
+        <button id="menu-button"><span>Menu : <span id="menu-label">discret</span></span> <kbd>H</kbd></button>
+        <button id="mode-button"><span>Mode : <span id="mode-label">Répulsion</span></span> <kbd>Espace</kbd></button>
+        <div class="control-row" title="Portée de la souris">
+            <span class="icon-range" aria-hidden="true"></span>
+            Portée : <span class="range-value" id="range-value">160 px</span>
+            <kbd>Molette</kbd>
+        </div>
+        <button id="gather-button">Rassembler <kbd>R</kbd></button>
+        <div class="control-row">Balles : <span class="range-value" id="orb-count"></span></div>
+        <div class="control-grid">
+            <button id="add-100">+100 <kbd>↑</kbd></button>
+            <button id="add-1000">+1000 <kbd>Maj ↑</kbd></button>
+            <button id="remove-100">−100 <kbd>↓</kbd></button>
+            <button id="remove-1000">−1000 <kbd>Maj ↓</kbd></button>
+        </div>
+        <div class="control-row">
+            <input type="number" id="ball-count" value="10" min="1">
+            <button id="add-button">Ajouter</button>
+            <button id="remove-button">Retirer</button>
+        </div>
+        <button id="color-button">Couleur aléatoire <kbd>C</kbd></button>
+        <button id="rainbow-button">Arc-en-ciel <kbd>A</kbd></button>
+    </div>
+
+    <div class="menu-hint" aria-hidden="true"><kbd>H</kbd></div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <script src="js/background.js"></script>
+
+    <script>
+        const RANGE_DEFAULT = 160;   // Portée d'origine de background.js, en pixels
+        const RANGE_MIN = 40;
+        const RANGE_MAX = 800;
+        const RANGE_WHEEL_RATE = 0.0015;   // Un cran de molette (100) change la portée d'environ 15 %
+
+        // États du menu, dans l'ordre de la touche H (valeur de data-menu, libellé).
+        const MENU_STATES = [['shown', 'affiché'], ['discreet', 'discret'], ['hidden', 'masqué']];
+        const SECRET_SEQUENCE_DELAY = 1500;   // Délai maximal entre le 6 et le 7
+
+        let range = RANGE_DEFAULT;
+        let menuState = 1;
+        let sixPressedAt = -Infinity;
+
+        const panel = document.getElementById('control-panel');
+        const modeLabel = document.getElementById('mode-label');
+        const rangeValue = document.getElementById('range-value');
+        const rainbowButton = document.getElementById('rainbow-button');
+        const ballCount = document.getElementById('ball-count');
+        const orbCount = document.getElementById('orb-count');
+        const menuLabel = document.getElementById('menu-label');
+
+        function cycleMenu() {
+            menuState = (menuState + 1) % MENU_STATES.length;
+            [document.body.dataset.menu, menuLabel.textContent] = MENU_STATES[menuState];
+        }
+
+        function toggleMode() {
+            modeLabel.textContent = window.toggleAttractionMode() ? 'Attraction' : 'Répulsion';
+        }
+
+        // Molette vers le haut : portée plus grande. Proportionnelle au défilement, pour
+        // rester douce avec un pavé tactile.
+        function changeRange(deltaY) {
+            range = Math.min(RANGE_MAX, Math.max(RANGE_MIN, range * Math.exp(-deltaY * RANGE_WHEEL_RATE)));
+            rangeValue.textContent = `${Math.round(range)} px`;
+            window.setPointerRange(range);
+        }
+
+        // Ajoute (n > 0) ou retire (n < 0) des balles, et met le compteur à jour.
+        function changeBalls(n) {
+            if (n > 0) window.addOrbs(n);
+            else window.removeOrbs(-n);
+            orbCount.textContent = window.countOrbs();
+        }
+
+        function toggleRainbowMode() {
+            rainbowButton.classList.toggle('is-on', window.toggleRainbow());
+        }
+
+        // Une couleur commune remplace l'arc-en-ciel.
+        function randomColor() {
+            const color = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            window.changeBackgroundParticlesColor(color);
+            if (rainbowButton.classList.contains('is-on')) toggleRainbowMode();
+        }
+
+        const BUTTON_ACTIONS = {
+            'menu-button': cycleMenu,
+            'mode-button': toggleMode,
+            'gather-button': () => window.gatherOrbs(),
+            'add-button': () => changeBalls(parseInt(ballCount.value) || 0),
+            'remove-button': () => changeBalls(-(parseInt(ballCount.value) || 0)),
+            'add-100': () => changeBalls(100),
+            'add-1000': () => changeBalls(1000),
+            'remove-100': () => changeBalls(-100),
+            'remove-1000': () => changeBalls(-1000),
+            'color-button': randomColor,
+            'rainbow-button': toggleRainbowMode
+        };
+
+        const KEY_ACTIONS = {
+            'h': cycleMenu,
+            ' ': toggleMode,
+            'r': () => window.gatherOrbs(),
+            'c': randomColor,
+            'a': toggleRainbowMode,
+            'k': () => window.spawnKirby(),   // Secret : absent du menu
+            'arrowup': () => changeBalls(100),
+            'arrowdown': () => changeBalls(-100),
+            'shift+arrowup': () => changeBalls(1000),
+            'shift+arrowdown': () => changeBalls(-1000)
+        };
+
+        Object.entries(BUTTON_ACTIONS).forEach(([id, action]) => {
+            document.getElementById(id).addEventListener('click', action);
+        });
+
+        // Secret, absent du menu : 6 puis 7 écrit « 67 » avec les balles. Lu par position
+        // de touche (en AZERTY, ces touches donnent « - » et « è » sans Maj).
+        function watchSecret(code) {
+            const digit = code.replace(/^(Digit|Numpad)/, '');
+            if (digit === '6') sixPressedAt = performance.now();
+            else if (digit === '7' && performance.now() - sixPressedAt < SECRET_SEQUENCE_DELAY) window.formText('67');
+        }
+
+        // Raccourcis clavier, sauf pendant la saisie du nombre de balles.
+        document.addEventListener('keydown', event => {
+            if (event.target.tagName === 'INPUT') return;
+            watchSecret(event.code);
+
+            const key = event.key.toLowerCase();
+            const action = (event.shiftKey && KEY_ACTIONS['shift+' + key]) || KEY_ACTIONS[key];
+            if (!action) return;
+
+            event.preventDefault();
+            action();
+        });
+
+        // Ctrl + molette reste le zoom du navigateur.
+        window.addEventListener('wheel', event => {
+            if (!event.ctrlKey) changeRange(event.deltaY);
+        });
+
+        orbCount.textContent = window.countOrbs();
+
+        // Clic dans la piscine (hors menu) : onde de choc, à l'inverse du mode de la souris.
+        document.getElementById('bg-canvas').addEventListener('click', event => window.shockwaveAt(event.clientX, event.clientY));
+
+        // Un clic ne donne pas le focus aux boutons : sinon Espace activerait aussi le
+        // dernier bouton cliqué, en plus de changer de mode.
+        panel.addEventListener('mousedown', event => {
+            if (event.target.closest('button')) event.preventDefault();
+        });
+    </script>
+</body>
+</html>
